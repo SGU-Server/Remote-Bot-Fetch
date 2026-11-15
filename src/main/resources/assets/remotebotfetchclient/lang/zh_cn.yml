@@ -7,6 +7,7 @@
       "name":
         "openGui": "打开设置菜单"
         "openFakeFetchGui": "打开假人取货菜单"
+        "inventoryFetchMenu": "背包内取货"
         "fakeFetchSupport": "假人远程取货支持"
         "middleClickLitematicBlockFetch": "中键投影取货"
         "autoOpenFakeInv": "假人取货自动打开假人背包"
@@ -19,6 +20,7 @@
       "comment":
         "openGui": "打开设置菜单快捷键"
         "openFakeFetchGui": "打开假人取货菜单"
+        "inventoryFetchMenu": "开启后玩家物品栏的配方书按钮会切换左侧的取货菜单"
         "fakeFetchSupport": "需要LMS Carpet Addition"
         "middleClickLitematicBlockFetch": "启用后鼠标中键点击原理图内玩家背包中没有的方块会立即取货（需要LMS Carpet Addition）\nShift+中键取1盒\n中键取1组"
         "autoOpenFakeInv": "自动打开假人背包"
@@ -32,3 +34,6 @@
     "ofpm":
       "cmd": "指令交互"
       "use": "右键交互"
+"remote-bot-fetch":
+  "gui":
+    "refresh": "刷新"

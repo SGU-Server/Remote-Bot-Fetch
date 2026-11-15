@@ -57,6 +57,14 @@ public class MCUtils {
         //#endif
     }
 
+    public static Screen getScreen() {
+        //#if MC>=260200
+        return MC.gui.screen();
+        //#else
+        //$$ return MC.screen;
+        //#endif
+    }
+
     public static ClientPacketListener getConnection() {
         return MC.getConnection();
     }

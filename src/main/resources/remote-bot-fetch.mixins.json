@@ -12,6 +12,14 @@
   "client": [
     "feature.lms.AbstractContainerScreen_Mixin",
     "feature.lms.CreativeModeInventoryScreen_Mixin",
-    "feature.lms.WorldUtils_Mixin"
+    "feature.lms.WorldUtils_Mixin",
+    "rbf.AbstractRecipeBookScreenMixin",
+    "rbf.ContainerEventHandlerScrollMixin",
+    "rbf.ContainerScreenAccessor",
+    "rbf.ContainerScreenPanelInputMixin",
+    "rbf.InventoryScreenMixin",
+    "rbf.RecipeBookComponentAccessor",
+    "rbf.RecipeBookComponentMixin",
+    "rbf.ScreenPreeditMixin"
   ]
 }

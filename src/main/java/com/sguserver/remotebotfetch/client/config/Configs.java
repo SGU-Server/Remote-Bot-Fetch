@@ -52,6 +52,9 @@ public class Configs implements IConfigHandler {
         @Config(tab = Tab.LMS)
         public static final ConfigHotkey LMS_TAKE_ITEM = new ConfigHotkey("openFakeFetchGui", "", "").apply(ALL);
         @Config(tab = Tab.LMS)
+        public static final ConfigBoolean INVENTORY_FETCH_MENU =
+            new ConfigBoolean("inventoryFetchMenu", true, "").apply(ALL);
+        @Config(tab = Tab.LMS)
         public static final ConfigBoolean LMS_FETCH_SUPPORT =
             new ConfigBoolean("fakeFetchSupport", false, "").apply(ALL);
         @Config(tab = Tab.LMS)

@@ -7,6 +7,7 @@
       "name":
         "openGui": "Open settings"
         "openFakeFetchGui": "openFakeFetchGui"
+        "inventoryFetchMenu": "Inventory Fetch Panel"
         "fakeFetchSupport": "fakeFetchSupport"
         "middleClickLitematicBlockFetch": "middleClickLitematicBlockFetch"
         "autoOpenFakeInv": "autoOpenFakeInv"
@@ -19,6 +20,7 @@
       "comment":
         "openGui": "Keybind to open settings"
         "openFakeFetchGui": "Open the fake player item retrieval menu"
+        "inventoryFetchMenu": "The recipe book button of the player inventory toggles the fetch panel on the left side"
         "fakeFetchSupport": "Requires LMS Carpet Addition"
         "middleClickLitematicBlockFetch": "After enabling, middle-clicking a block in a schematic that is not in the player's inventory will immediately retrieve it (requires LMS Carpet Addition)\nShift + middle-click retrieves 1 shulker box\nMiddle-click retrieves 1 stack"
         "autoOpenFakeInv": "Automatically open the fake player's inventory"
@@ -32,3 +34,6 @@
     "ofpm":
       "cmd": "Command Interaction"
       "use": "Right-Click Interaction"
+"remote-bot-fetch":
+  "gui":
+    "refresh": "Refresh"

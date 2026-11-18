@@ -7,6 +7,7 @@
 import { themes as prismThemes } from "prism-react-renderer";
 
 const isCloudflarePages = process.env.CF_PAGES === "1";
+const isMainBranch = process.env.CF_PAGES_BRANCH === "main";
 let url, baseUrl, commitUrl, commitShaShort;
 if (isCloudflarePages) {
   url = "https://rbf.sgu-server.com";
@@ -172,7 +173,7 @@ const config = {
         contextualSearch: true,
       },
       announcementBar:
-        isCloudflarePages && commitUrl
+        isCloudflarePages && !isMainBranch && commitUrl
           ? {
               id: "test_environment",
               content: `⚠️ This is the test environment of the Remote Bot Fetch website. Built for commit <a href="${commitUrl}">${commitShaShort}</a>. ⚠️`,

@@ -66,7 +66,7 @@ const config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            "https://github.com/SGU-Server/Remote-Bot-Fetch/tree/master/website/",
+            "https://github.com/SGU-Server/Remote-Bot-Fetch/tree/main/website/",
         },
         theme: {
           customCss: "./src/css/custom.css",
@@ -167,7 +167,7 @@ const config = {
       },
       // https://docusaurus.io/docs/search#using-algolia-docsearch
       algolia: {
-        appId: "QTOCT8J8BF",
+        appId: "5IXFHKZ83W",
         apiKey: "d9cb5b103dedaac0a2e0814f7b6019be",
         indexName: "remote-bot-fetch",
         contextualSearch: true,

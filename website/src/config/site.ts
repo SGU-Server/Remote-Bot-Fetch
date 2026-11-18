@@ -1,5 +1,5 @@
 export const SITE = {
-  url: "https://rbf.sgu-server.com",
+  url: "https://rbf-docs.sgu-server.com",
   verify: {
     google: "example",
     yandex: "example",

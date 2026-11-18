@@ -2,5 +2,9 @@
   "version.label": {
     "message": "Next",
     "description": "The label for version current"
+  },
+  "sidebar.tutorialSidebar.category.Development": {
+    "message": "开发",
+    "description": "The label for category 'Development' in sidebar 'tutorialSidebar'"
   }
 }

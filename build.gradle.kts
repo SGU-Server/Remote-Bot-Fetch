@@ -111,14 +111,23 @@ spotless {
             "*.json",
             "*.yml",
             "*.xml",
+            "website/*.js",
+            "website/*.md",
+            "website/package.json",
+            "website/pnpm-workspace.yaml",
+            "website/plugins/**/*.js",
+            "website/docs/**/*.md",
+            "website/docs/**/*.mdx",
+            "website/src/**/*.js",
+            "website/src/**/*.jsx",
+            "website/src/**/*.css",
             "website/src/**/*.md",
             "website/src/**/*.mdx",
-            "website/src/**/*.astro",
-            "website/src/**/*.ts",
-            "website/*.json",
-            "website/*.yaml",
-            "website/*.mjs",
-            "website/public/*.html",
+            "website/src/**/*.json",
+            "website/i18n/**/*.json",
+            "website/i18n/**/*.md",
+            "website/i18n/**/*.mdx",
+            "website/static/img/**/*.svg",
             "src/main/resources/*.json",
             "src/main/resources/assets/**/*.yml",
             "src/main/resources/assets/**/*.json",
@@ -134,9 +143,6 @@ spotless {
                 "@prettier/plugin-xml" to
                     libs.versions.prettierPlugin.xml
                         .get(),
-                "prettier-plugin-astro" to
-                    libs.versions.prettierPlugin.astro
-                        .get(),
             ),
         ).config(
             mapOf(
@@ -144,7 +150,6 @@ spotless {
                     listOf(
                         "prettier-plugin-toml",
                         "@prettier/plugin-xml",
-                        "prettier-plugin-astro",
                     ),
             ),
         )
@@ -158,7 +163,7 @@ spotless {
             "versions/*/remote-bot-fetch.accesswidener",
             "copyright.txt",
             "mappings/*.txt",
-            "website/public/_headers",
+            "website/static/CNAME",
             "eclipse-importorder.txt",
         )
         trimTrailingWhitespace()

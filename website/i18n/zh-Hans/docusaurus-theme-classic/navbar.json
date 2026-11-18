@@ -1,0 +1,18 @@
+{
+  "title": {
+    "message": "Remote Bot Fetch",
+    "description": "The title in the navbar"
+  },
+  "logo.alt": {
+    "message": "Remote Bot Fetch Icon",
+    "description": "The alt text of navbar logo"
+  },
+  "item.label.Documents": {
+    "message": "文档",
+    "description": "Navbar item with label Documents"
+  },
+  "item.label.EOL": {
+    "message": "EOL",
+    "description": "Navbar item with label EOL"
+  }
+}

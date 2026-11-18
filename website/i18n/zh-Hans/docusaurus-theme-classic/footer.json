@@ -1,0 +1,46 @@
+{
+  "link.title.Download": {
+    "message": "下载",
+    "description": "The title of the footer links column with title=Download in the footer"
+  },
+  "link.title.Contact": {
+    "message": "联系",
+    "description": "The title of the footer links column with title=Contact in the footer"
+  },
+  "link.title.Related Projects": {
+    "message": "相关项目",
+    "description": "The title of the footer links column with title=Related Projects in the footer"
+  },
+  "link.item.label.Remote Bot Fetch Server": {
+    "message": "Remote Bot Fetch Server",
+    "description": "The label of footer link with label=Remote Bot Fetch Server linking to https://github.com/SGU-Server/Remote-Bot-Fetch-Server"
+  },
+  "link.item.label.Carpet LMS Addition": {
+    "message": "Carpet LMS Addition",
+    "description": "The label of footer link with label=Carpet LMS Addition linking to https://github.com/Citrus-Union/Carpet-LMS-Addition"
+  },
+  "link.item.label.antideath-survival-assistant": {
+    "message": "antideath-survival-assistant",
+    "description": "The label of footer link with label=antideath-survival-assistant linking to https://github.com/jfglzs/Antideath-survival-assistant"
+  },
+  "copyright": {
+    "message": "Copyright © 2026 Remote Bot Fetch. Built with Docusaurus.",
+    "description": "The footer copyright"
+  },
+  "link.item.label.GitHub Releases": {
+    "message": "GitHub Releases",
+    "description": "The label of footer link with label=GitHub Releases linking to https://github.com/SGU-Server/Remote-Bot-Fetch/releases"
+  },
+  "link.item.label.CurseForge": {
+    "message": "CurseForge",
+    "description": "The label of footer link with label=CurseForge linking to https://www.curseforge.com/minecraft/mc-mods/remote-bot-fetch/files"
+  },
+  "link.item.label.Modrinth": {
+    "message": "Modrinth",
+    "description": "The label of footer link with label=Modrinth linking to https://modrinth.com/mod/remote-bot-fetch/versions"
+  },
+  "link.item.label.GitHub Repository": {
+    "message": "GitHub Repository",
+    "description": "The label of footer link with label=GitHub Repository linking to https://github.com/SGU-Server/Remote-Bot-Fetch"
+  }
+}

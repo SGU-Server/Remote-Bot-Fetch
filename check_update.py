@@ -235,7 +235,6 @@ def build_specs() -> list[CheckSpec]:
         check_npm("prettier", "prettier"),
         check_npm("prettierPlugin-toml", "prettier-plugin-toml"),
         check_npm("prettierPlugin-xml", "@prettier/plugin-xml"),
-        check_npm("prettierPlugin-astro", "prettier-plugin-astro"),
         check_source("eclipse", "eclipse-updates", eclipse_update_site_latest),
         check_github_release("ktlint", "ktlint", "ktlint"),
     ]

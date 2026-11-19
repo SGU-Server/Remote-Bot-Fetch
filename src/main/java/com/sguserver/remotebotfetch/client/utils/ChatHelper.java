@@ -135,7 +135,7 @@ public class ChatHelper {
 
     //from carpet mod Messenger#c
     public static Component c(Object... fields) {
-        MutableComponent message = Component.literal("[ASA] ");
+        MutableComponent message = Component.literal("[RBF] ");
         MutableComponent previousComponent = null;
         for (Object o : fields) {
             if (o instanceof MutableComponent component) {

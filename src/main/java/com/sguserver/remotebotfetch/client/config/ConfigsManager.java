@@ -35,7 +35,6 @@ public class ConfigsManager {
     public static final List<ConfigHotkey> KEY_LIST = new ArrayList<>();
     public static final List<IHotkeyTogglable> SWITCH_KEY = new ArrayList<>();
     private static final List<IConfigBase> ALL = new ArrayList<>();
-    private static final List<IConfigBase> LMS = new ArrayList<>();
 
     public static void init() {
         Arrays.stream(Configs.classes).flatMap(clz -> Arrays.stream(clz.getDeclaredFields()))
@@ -54,13 +53,6 @@ public class ConfigsManager {
 
         ALL.add(obj);
 
-        Config config = field.getAnnotation(Config.class);
-
-        for (Tab tab : config.tab()) {
-            if (tab == Tab.LMS)
-                LMS.add(obj);
-        }
-
         if (obj instanceof ConfigHotkey hotkey) {
             KEY_LIST.add(hotkey);
         } else if (obj instanceof ConfigBooleanHotkeyed booleanHotkeyed) {
@@ -69,10 +61,7 @@ public class ConfigsManager {
     }
 
     public static ImmutableList<IConfigBase> getConfigs(Tab tab) {
-        ImmutableList<IConfigBase> list = switch (tab) {
-            case ALL -> ImmutableList.copyOf(ALL);
-            case LMS -> ImmutableList.copyOf(LMS);
-        };
+        ImmutableList<IConfigBase> list = ImmutableList.copyOf(ALL);
         if (list.isEmpty())
             throw new IllegalStateException("Not initialized");
         return list;

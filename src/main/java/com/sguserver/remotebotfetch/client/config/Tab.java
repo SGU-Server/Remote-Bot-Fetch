@@ -19,7 +19,7 @@ package com.sguserver.remotebotfetch.client.config;
 import fi.dy.masa.malilib.util.StringUtils;
 
 public enum Tab {
-    ALL("asa.config.cate.all"), LMS("asa.config.cate.lms");
+    ALL("remote-bot-fetch.config.cate.all");
 
     public final String translation;
 

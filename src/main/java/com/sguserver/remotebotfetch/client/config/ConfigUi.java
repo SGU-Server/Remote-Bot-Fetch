@@ -31,7 +31,7 @@ public class ConfigUi extends GuiConfigsBase {
     private static Tab tab = Tab.ALL;
 
     public ConfigUi() {
-        super(10, 50, MOD_ID_FANCY, null, "ASA V%s Configs".formatted(version));
+        super(10, 50, MOD_ID_FANCY, null, "%s V%s Configs".formatted(MOD_ID_FANCY, version));
     }
 
     @Override

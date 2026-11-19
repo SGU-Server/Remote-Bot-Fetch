@@ -17,6 +17,7 @@
 package com.sguserver.remotebotfetch.client.mixin.feature.lms;
 
 import java.util.List;
+import java.util.Set;
 
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -35,10 +36,13 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.google.common.collect.ImmutableList;
+import com.sguserver.remotebotfetch.client.ClientMod;
 import com.sguserver.remotebotfetch.client.config.Configs;
 import com.sguserver.remotebotfetch.client.feature.lms.ItemStorageDataManager;
 import com.sguserver.remotebotfetch.client.utils.ChatHelper;
+import com.sguserver.remotebotfetch.client.utils.MCUtils;
 import com.sguserver.remotebotfetch.client.utils.PlayerUtils;
+import com.sguserver.remotebotfetch.client.utils.ThreadUtils;
 
 @Mixin(AbstractContainerScreen.class)
 public abstract class AbstractContainerScreen_Mixin<T extends AbstractContainerMenu> extends Screen {
@@ -56,6 +60,32 @@ public abstract class AbstractContainerScreen_Mixin<T extends AbstractContainerM
     @Inject(method = "onClose", at = @At("TAIL"))
     private void onClose(CallbackInfo ci) {
         this.asa$cacheData();
+        this.asa$killFakePlayers();
+    }
+
+    @Unique
+    private void asa$killFakePlayers() {
+        if (!Configs.LMS.AUTO_KILL_FAKE_PLAYERS.getBooleanValue())
+            return;
+
+        Set<String> fakePlayerNames = ItemStorageDataManager.WAIT_FOR_KILLING();
+        String title = this.title.getString();
+        for (String name : List.copyOf(fakePlayerNames)) {
+            if (!title.contains(name))
+                continue;
+
+            ThreadUtils.runAsync(() -> {
+                try {
+                    Thread.sleep(Configs.LMS.AUTO_COOLDOWN.getIntegerValue());
+                    MCUtils.executeTask(() -> MCUtils.executeCommand("player %s kill".formatted(name)));
+                } catch (Exception e) {
+                    ChatHelper.clientChat(ChatHelper.c(e.getMessage()));
+                    ClientMod.LOGGER.error(e.getMessage(), e);
+                } finally {
+                    fakePlayerNames.remove(name);
+                }
+            });
+        }
     }
 
     @Unique

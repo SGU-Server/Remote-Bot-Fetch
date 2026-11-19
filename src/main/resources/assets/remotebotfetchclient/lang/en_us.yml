@@ -1,8 +1,7 @@
-"asa":
+"remote-bot-fetch":
   "config":
     "cate":
       "all": "All"
-      "lms": "LMS"
     "all":
       "name":
         "openGui": "Open settings"
@@ -12,11 +11,15 @@
         "middleClickLitematicBlockFetch": "middleClickLitematicBlockFetch"
         "autoOpenFakeInv": "autoOpenFakeInv"
         "autoOpenFakeInv-Mode": "autoOpenFakeInv-Mode"
+        "autoKillFake": "autoKillFake"
         "autoActionCooldown": "autoActionCooldown"
         "fakeInvCache": "fakeInvCache"
         "fakeInvCache-Whitelist": "fakeInvCache-Whitelist"
         "fakeInvCache-clear": "fakeInvCache-clear"
+        "MaterialList-CaculateLMS": "MaterialList-CaculateLMS"
+        "MaterialList-CaculateInv": "MaterialList-CaculateInv"
         "fakeAutoRefresh": "fakeAutoRefresh"
+        "debug": "debug"
       "comment":
         "openGui": "Keybind to open settings"
         "openFakeFetchGui": "Open the fake player item retrieval menu"
@@ -25,15 +28,18 @@
         "middleClickLitematicBlockFetch": "After enabling, middle-clicking a block in a schematic that is not in the player's inventory will immediately retrieve it (requires LMS Carpet Addition)\nShift + middle-click retrieves 1 shulker box\nMiddle-click retrieves 1 stack"
         "autoOpenFakeInv": "Automatically open the fake player's inventory"
         "autoOpenFakeInv-Mode": ""
+        "autoKillFake": "Automatically despawn the fake players after their inventory was opened"
         "autoActionCooldown": "Unit: ms"
         "fakeInvCache": "Caches items in fake player inventories when enabled; schematic block retrieval prioritizes cached fake player inventories"
         "fakeInvCache-Whitelist": ""
         "fakeInvCache-clear": ""
+        "MaterialList-CaculateLMS": "When enabled, the Litematica material list counts all items"
+        "MaterialList-CaculateInv": "When enabled, the Litematica material list counts items in cached fake player inventories"
         "fakeAutoRefresh": "fakeAutoRefresh"
+        "debug": ""
   "opts":
     "ofpm":
       "cmd": "Command Interaction"
       "use": "Right-Click Interaction"
-"remote-bot-fetch":
   "gui":
     "refresh": "Refresh"

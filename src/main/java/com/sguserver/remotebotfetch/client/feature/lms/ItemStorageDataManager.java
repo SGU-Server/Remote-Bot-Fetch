@@ -59,6 +59,7 @@ public class ItemStorageDataManager {
     private static final Type PLAYER_TYPE = new TypeToken<List<PlayerItemStorage>>() {}.getType();
     private static final Type ITEM_TYPE = new TypeToken<List<ItemStorage>>() {}.getType();
     private static final Set<String> WAIT_FOR_INV = new ObjectArraySet<>();
+    private static final Set<String> WAIT_FOR_KILLING = new ObjectArraySet<>();
 
     public static void init() {
         ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {
@@ -97,6 +98,7 @@ public class ItemStorageDataManager {
                                 SoundEvents.VILLAGER_YES);
 
                             WAIT_FOR_INV.add(name);
+                            WAIT_FOR_KILLING.add(name);
                         }
                         return false;
                     } catch (Exception e) {
@@ -205,6 +207,10 @@ public class ItemStorageDataManager {
             } else {
                 components.add(ChatHelper.c("bl 存货: %d (%.2f 潜影盒) ".formatted(count, (float)count / oneBoxCount)));
             }
+            if (Configs.LMS.LITEMATICA_CALCULATE_FAKE.getBooleanValue()) {
+                components
+                    .add(ChatHelper.c("bl 假人存货: %d".formatted(FAKE_ITEM_STORAGES.getInt(MCUtils.getItemID(item)))));
+            }
         } else {
             components.add(ChatHelper.c("br 暂无存货"));
         }
@@ -250,9 +256,15 @@ public class ItemStorageDataManager {
                         ChatHelper.clientChat(ChatHelper.c(e.getMessage()));
                         ClientMod.LOGGER.error(e.getMessage(), e);
                     }
+
+                    WAIT_FOR_KILLING.add(name);
                 });
             }
         }
+    }
+
+    public static Set<String> WAIT_FOR_KILLING() {
+        return WAIT_FOR_KILLING;
     }
 
     public record PlayerInventory(ImmutableList<Slot> slots) {

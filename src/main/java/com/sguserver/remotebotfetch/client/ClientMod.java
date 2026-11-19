@@ -38,8 +38,8 @@ import fi.dy.masa.malilib.event.InitializationHandler;
 import fi.dy.masa.malilib.event.InputEventHandler;
 
 public class ClientMod implements ClientModInitializer {
-    public static final String MOD_ID_FANCY = "ASA";
-    public static final String MOD_ID = "asa";
+    public static final String MOD_ID_FANCY = "Remote Bot Fetch";
+    public static final String MOD_ID = "remote-bot-fetch";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     public static String version;
 

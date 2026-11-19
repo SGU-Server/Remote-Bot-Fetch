@@ -46,58 +46,82 @@ public class Configs implements IConfigHandler {
     public static final Class<?>[] classes = new Class[] {LMS.class, Configs.class};
 
     @Config
-    public static final ConfigHotkey OPEN_CONFIG = new ConfigHotkey("openGui", "Z,K", "").apply(ALL);
+    public static final ConfigHotkey OPEN_CONFIG = new ConfigHotkey("openGui", "R,B", "").apply(ALL);
 
     public static class LMS {
-        @Config(tab = Tab.LMS)
+        @Config(tab = Tab.ALL)
         public static final ConfigHotkey LMS_TAKE_ITEM = new ConfigHotkey("openFakeFetchGui", "", "").apply(ALL);
-        @Config(tab = Tab.LMS)
+        @Config(tab = Tab.ALL)
         public static final ConfigBoolean INVENTORY_FETCH_MENU =
             new ConfigBoolean("inventoryFetchMenu", true, "").apply(ALL);
-        @Config(tab = Tab.LMS)
+        @Config(tab = Tab.ALL)
         public static final ConfigBoolean LMS_FETCH_SUPPORT =
             new ConfigBoolean("fakeFetchSupport", false, "").apply(ALL);
-        @Config(tab = Tab.LMS)
+        @Config(tab = Tab.ALL)
         public static final ConfigBoolean LMS_AUTO_REFRESH = new ConfigBoolean("fakeAutoRefresh", false, "").apply(ALL);
-        @Config(tab = Tab.LMS)
+        @Config(tab = Tab.ALL)
         public static final ConfigBooleanHotkeyed MID_CLICK_TAKE_ITEM =
             new ConfigBooleanHotkeyed("middleClickLitematicBlockFetch", false, "", "").apply(ALL);
-        @Config(tab = Tab.LMS)
+        @Config(tab = Tab.ALL)
         public static final ConfigBooleanHotkeyed AUTO_OPEN_FAKE_PLAYER_INV =
             new ConfigBooleanHotkeyed("autoOpenFakeInv", false, "", "").apply(ALL);
-        @Config(tab = Tab.LMS)
+        @Config(tab = Tab.ALL)
         public static final ConfigOptionList AUTO_OPEN_FAKE_PLAYER_INV_MODE =
             new ConfigOptionList("autoOpenFakeInv-Mode", OpenFakePlayerInvMode.INTERACTION, "", "").apply(ALL);
-        @Config(tab = Tab.LMS)
+        @Config(tab = Tab.ALL)
+        public static final ConfigBooleanHotkeyed AUTO_KILL_FAKE_PLAYERS =
+            new ConfigBooleanHotkeyed("autoKillFake", false, "", "").apply(ALL);
+        @Config(tab = Tab.ALL)
         public static final ConfigInteger AUTO_COOLDOWN =
             new ConfigInteger("autoActionCooldown", 100, 100, 1000, "", "").apply(ALL);
-        @Config(tab = Tab.LMS)
+        @Config(tab = Tab.ALL)
         public static final ConfigBooleanHotkeyed FAKE_PLAYER_INVENTORY_ITEM_CACHE =
             new ConfigBooleanHotkeyed("fakeInvCache", false, "", "").apply(ALL);
-        @Config(tab = Tab.LMS)
+        @Config(tab = Tab.ALL)
         public static final ConfigHotkey CLEAN_PLAYER_INV_CHACHE =
             new ConfigHotkey("fakeInvCache-clear", "", "", "").apply(ALL);
-        @Config(tab = Tab.LMS)
+        @Config(tab = Tab.ALL)
+        public static final ConfigBooleanHotkeyed LITEMATICA_CALCULATE_QWP =
+            new ConfigBooleanHotkeyed("MaterialList-CaculateLMS", false, "", "").apply(ALL);
+        @Config(tab = Tab.ALL)
+        public static final ConfigBooleanHotkeyed LITEMATICA_CALCULATE_FAKE =
+            new ConfigBooleanHotkeyed("MaterialList-CaculateInv", false, "", "").apply(ALL);
+        @Config(tab = Tab.ALL)
         public static final ConfigStringList FAKE_PLAYER_INVENTORY_ITEM_CACHE_WHITE_LIST =
             new ConfigStringList("fakeInvCache-Whitelist", ImmutableList.of(), "").apply(ALL);
     }
 
     public static boolean lockCreativeScreen = false;
     private static final String FILE_PATH = "./config/" + ClientMod.MOD_ID + ".json";
+    private static final String LEGACY_FILE_PATH = "./config/asa.json";
+    private static final String LEGACY_MOD_ID = "asa";
+
+    @Config
+    public static final ConfigBooleanHotkeyed DEBUG = new ConfigBooleanHotkeyed("debug", false, "", "").apply(ALL);
 
     @Override
     public void load() {
         File file = new File(FILE_PATH);
         if (file.isFile()) {
-            try {
-                JsonElement element = JsonParser.parseString(Files.readString(file.toPath()));
-                if (element.isJsonObject()) {
-                    ConfigUtils.readConfigBase(element.getAsJsonObject(), ClientMod.MOD_ID,
-                        ConfigsManager.getConfigs(Tab.ALL));
-                }
-            } catch (IOException | RuntimeException e) {
-                ClientMod.LOGGER.error("Failed to load ASA config", e);
+            readConfig(file, ClientMod.MOD_ID);
+            return;
+        }
+
+        File legacyFile = new File(LEGACY_FILE_PATH);
+        if (legacyFile.isFile()) {
+            readConfig(legacyFile, LEGACY_MOD_ID);
+            this.save();
+        }
+    }
+
+    private static void readConfig(File file, String modId) {
+        try {
+            JsonElement element = JsonParser.parseString(Files.readString(file.toPath()));
+            if (element.isJsonObject()) {
+                ConfigUtils.readConfigBase(element.getAsJsonObject(), modId, ConfigsManager.getConfigs(Tab.ALL));
             }
+        } catch (IOException | RuntimeException e) {
+            ClientMod.LOGGER.error("Failed to load {} config", modId, e);
         }
     }
 
@@ -108,9 +132,9 @@ public class Configs implements IConfigHandler {
             JsonObject root = new JsonObject();
             ConfigUtils.writeConfigBase(root, ClientMod.MOD_ID, ConfigsManager.getConfigs(Tab.ALL));
             try {
-                Files.writeString(dir.toPath().resolve("asa.json"), GSON.toJson(root));
+                Files.writeString(dir.toPath().resolve(ClientMod.MOD_ID + ".json"), GSON.toJson(root));
             } catch (IOException e) {
-                ClientMod.LOGGER.error("Failed to save ASA config", e);
+                ClientMod.LOGGER.error("Failed to save {} config", ClientMod.MOD_ID, e);
             }
         }
     }

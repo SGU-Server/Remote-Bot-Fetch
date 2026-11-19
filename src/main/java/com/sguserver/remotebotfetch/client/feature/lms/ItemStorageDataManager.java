@@ -59,6 +59,7 @@ public class ItemStorageDataManager {
     private static final Type PLAYER_TYPE = new TypeToken<List<PlayerItemStorage>>() {}.getType();
     private static final Type ITEM_TYPE = new TypeToken<List<ItemStorage>>() {}.getType();
     private static final Set<String> WAIT_FOR_INV = new ObjectArraySet<>();
+    private static final Set<String> WAIT_FOR_KILLING = new ObjectArraySet<>();
 
     public static void init() {
         ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {
@@ -97,6 +98,7 @@ public class ItemStorageDataManager {
                                 SoundEvents.VILLAGER_YES);
 
                             WAIT_FOR_INV.add(name);
+                            WAIT_FOR_KILLING.add(name);
                         }
                         return false;
                     } catch (Exception e) {
@@ -250,9 +252,15 @@ public class ItemStorageDataManager {
                         ChatHelper.clientChat(ChatHelper.c(e.getMessage()));
                         ClientMod.LOGGER.error(e.getMessage(), e);
                     }
+
+                    WAIT_FOR_KILLING.add(name);
                 });
             }
         }
+    }
+
+    public static Set<String> WAIT_FOR_KILLING() {
+        return WAIT_FOR_KILLING;
     }
 
     public record PlayerInventory(ImmutableList<Slot> slots) {

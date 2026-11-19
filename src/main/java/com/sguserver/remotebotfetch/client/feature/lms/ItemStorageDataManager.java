@@ -207,6 +207,10 @@ public class ItemStorageDataManager {
             } else {
                 components.add(ChatHelper.c("bl 存货: %d (%.2f 潜影盒) ".formatted(count, (float)count / oneBoxCount)));
             }
+            if (Configs.LMS.LITEMATICA_CALCULATE_FAKE.getBooleanValue()) {
+                components
+                    .add(ChatHelper.c("bl 假人存货: %d".formatted(FAKE_ITEM_STORAGES.getInt(MCUtils.getItemID(item)))));
+            }
         } else {
             components.add(ChatHelper.c("br 暂无存货"));
         }

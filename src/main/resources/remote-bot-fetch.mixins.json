@@ -2,6 +2,7 @@
   "required": true,
   "package": "com.sguserver.remotebotfetch.client.mixin",
   "compatibilityLevel": "{{COMPATIBILITY_LEVEL}}",
+  "plugin": "com.sguserver.remotebotfetch.client.mixin.ClientMixinPlugin",
   "mixins": [],
   "injectors": {
     "defaultRequire": 1
@@ -12,6 +13,7 @@
   "client": [
     "feature.lms.AbstractContainerScreen_Mixin",
     "feature.lms.CreativeModeInventoryScreen_Mixin",
+    "feature.lms.MaterialListEntry_Mixin",
     "feature.lms.WorldUtils_Mixin",
     "rbf.AbstractRecipeBookScreenMixin",
     "rbf.ContainerEventHandlerScrollMixin",

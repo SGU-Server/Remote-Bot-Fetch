@@ -90,6 +90,9 @@ public class RbfFetchPanel {
     /** Kept across screens so closing and reopening the inventory restores the panel. */
     private static boolean lastOpen;
 
+    /** Kept across screens so the panel reopens on the tab the player selected last. */
+    private static CreativeModeTab lastSelectedTab;
+
     private boolean open;
     private boolean dragging;
     private ItemStack heldStack = ItemStack.EMPTY;
@@ -185,8 +188,11 @@ public class RbfFetchPanel {
             .toList();
 
         if (this.selectedTab == null || !this.tabs.contains(this.selectedTab)) {
-            this.selectedTab = this.tabs.isEmpty() ? CreativeModeTabs.getDefaultTab() : this.tabs.get(0);
+            this.selectedTab = lastSelectedTab != null && this.tabs.contains(lastSelectedTab) ? lastSelectedTab
+                : (this.tabs.isEmpty() ? CreativeModeTabs.getDefaultTab() : this.tabs.get(0));
         }
+
+        lastSelectedTab = this.selectedTab;
     }
 
     public void rebuildItems() {
@@ -531,6 +537,7 @@ public class RbfFetchPanel {
             if (this.hovering(tabX, tabY, TAB_WIDTH, TAB_HEIGHT, (int)mouseX, (int)mouseY)) {
                 if (tab != this.selectedTab) {
                     this.selectedTab = tab;
+                    lastSelectedTab = tab;
                     this.scrollOffs = 0.0F;
                     this.rebuildItems();
                 }

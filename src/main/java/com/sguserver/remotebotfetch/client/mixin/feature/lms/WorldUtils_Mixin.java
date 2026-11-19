@@ -37,17 +37,30 @@ import com.sguserver.remotebotfetch.client.utils.PlayerUtils;
 @Pseudo
 @Mixin(targets = "fi.dy.masa.litematica.util.WorldUtils")
 public class WorldUtils_Mixin {
+    /** Litematica calls this method twice per key press, so the second call in the same tick has to be ignored. */
+    private static long rbf$lastSubmitTick = Long.MIN_VALUE;
 
     @Inject(method = "doSchematicWorldPickBlock", at = @At(value = "INVOKE",
         target = "Lfi/dy/masa/litematica/schematic/pickblock/SchematicPickBlockEventHandler;onSchematicPickBlockPrePick(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/item/ItemStack;)Z"))
     private static void doSchematicWorldPickBlock_Inject(boolean closest, Minecraft mc,
         CallbackInfoReturnable<Boolean> cir, @Local ItemStack stack, @Local BlockPos pos) {
+        if (mc.level == null) {
+            return;
+        }
+
+        long tick = mc.level.getGameTime();
+        if (rbf$lastSubmitTick == tick) {
+            return;
+        }
+
         if (PlayerUtils.checkRemainCount(stack.getItem()) == 0 && PlayerUtils.isSurvivalMode(mc.player)
             && mc.level.getBlockState(pos).getBlock() == Blocks.AIR) {
             if (Configs.LMS.MID_CLICK_TAKE_ITEM.getBooleanValue()) {
-                ClientMod.debugMessage(() -> "Submitted %s %d to ItemStorageDataManager");
-                ItemStorageDataManager.submit(stack.getItem(),
-                    mc.player.isShiftKeyDown() ? stack.getMaxStackSize() * 27 : stack.getMaxStackSize());
+                rbf$lastSubmitTick = tick;
+                int count = mc.player.isShiftKeyDown() ? stack.getMaxStackSize() * 27 : stack.getMaxStackSize();
+                ClientMod
+                    .debugMessage(() -> "Submitted %s x%d to ItemStorageDataManager".formatted(stack.getItem(), count));
+                ItemStorageDataManager.submit(stack.getItem(), count);
             }
         }
     }

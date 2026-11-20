@@ -25,7 +25,8 @@ if (isCloudflarePages) {
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: "Remote Bot Fetch",
-  tagline: "todo",
+  tagline:
+    "Fabric mod for fetching items from Carpet fake players and checking storage counts in Litematica’s Material List.",
   favicon: "img/icon.png",
   headTags: [
     {

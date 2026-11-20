@@ -7,15 +7,14 @@ const FeatureList = [
   {
     title: translate({
       id: "homepage.feature.rich.message",
-      message: "Rich Features & Tools",
+      message: "Live stock at a glance",
     }),
-    Svg: require("@site/static/img/toolbox.svg").default,
+    Svg: require("@site/static/img/stock.svg").default,
     description: (
       <>
         <Translate id="homepage.feature.rich.description">
-          Remote Bot Fetch packs an array of features and tools, including
-          carpet rules, loggers and commands, enriching your Technical Minecraft
-          experience
+          Remote Bot Fetch makes stock lookups quick and easy: check the live
+          item counts of every configured container at any time
         </Translate>
       </>
     ),
@@ -23,14 +22,14 @@ const FeatureList = [
   {
     title: translate({
       id: "homepage.feature.vanilla.message",
-      message: "Keep the game vanilla",
+      message: "One jar, both sides",
     }),
-    Svg: require("@site/static/img/vanilla.svg").default,
+    Svg: require("@site/static/img/merged-jar.svg").default,
     description: (
       <>
         <Translate id="homepage.feature.vanilla.description">
-          Remote Bot Fetch never changes the vanilla behavior unless explicitly
-          configured by the user. Keep Minecraft vanilla
+          The server and the client are merged into a single jar, so updating
+          the mod is one file and the whole thing is lighter
         </Translate>
       </>
     ),
@@ -44,8 +43,8 @@ const FeatureList = [
     description: (
       <>
         <Translate id="homepage.feature.versions.description">
-          From Minecraft 1.14 to the latest snapshot, Remote Bot Fetch provides
-          consistent support across multiple Minecraft versions
+          From Minecraft 1.21 to 26.3, Remote Bot Fetch provides consistent
+          support across a range of Minecraft versions
         </Translate>
       </>
     ),

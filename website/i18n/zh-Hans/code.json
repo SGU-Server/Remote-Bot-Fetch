@@ -1,21 +1,21 @@
 {
   "homepage.feature.rich.message": {
-    "message": "大量特性 & 工具"
+    "message": "直观的库存显示"
   },
   "homepage.feature.rich.description": {
-    "message": "Remote Bot Fetch 提供了大量的特性和工具，包括地毯规则、记录器和命令等，旨在提升你的技术 Minecraft 游戏体验"
+    "message": "Remote Bot Fetch 提供了方便快捷的库存查询功能，您可以快速查看实时的库存数量信息。"
   },
   "homepage.feature.vanilla.message": {
-    "message": "忠于原版"
+    "message": "合二为一"
   },
   "homepage.feature.vanilla.description": {
-    "message": "Remote Bot Fetch 永远不会自行修改游戏的原版机制，除非用户显式配置启动了某些特性。让 Minecraft 保持原版"
+    "message": "Remote Bot Fetch 的服务端与客户端融合为单个 Jar 文件，方便更新模组的同时也变得更轻量化。"
   },
   "homepage.feature.versions.message": {
     "message": "广泛的版本兼容性"
   },
   "homepage.feature.versions.description": {
-    "message": "从 Minecraft 1.14 到最新的快照版，Remote Bot Fetch 为一系列 Minecraft 版本提供着持续支持"
+    "message": "从 Minecraft 1.21 到 26.3 正式版，Remote Bot Fetch 为一系列 Minecraft 版本提供着持续支持"
   },
   "homepage.header.subtitle": {
     "message": "一个 Carpet 模组（fabric-carpet）的扩展，包含了众多 Carpet 风格的实用工具和有趣的特性"

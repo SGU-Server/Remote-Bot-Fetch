@@ -195,10 +195,11 @@ const config = {
       "@dipakparmar/docusaurus-plugin-umami",
       /** @type {import('@dipakparmar/docusaurus-plugin-umami').Options} */
       ({
-        websiteID: "16a9a902-f687-42f3-ab28-48286ea12adc", // Required
-        analyticsDomain: "cloud.umami.is", // Required
+        websiteID: "6e13b48c-efe7-4ae9-bad9-05edc9b7c27e", // Required
+        analyticsDomain: "umami.sgu-server.com", // Required
         scriptName: "script.js", // Optional
         dataDomains: "rbf.sgu-server.com", // comma separated list of domains, *Recommended*
+        enableRecorder: true,
       }),
     ],
   ],

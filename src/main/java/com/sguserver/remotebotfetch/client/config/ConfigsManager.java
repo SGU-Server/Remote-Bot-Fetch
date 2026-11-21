@@ -55,7 +55,8 @@ public class ConfigsManager {
 
         if (obj instanceof ConfigHotkey hotkey) {
             KEY_LIST.add(hotkey);
-        } else if (obj instanceof ConfigBooleanHotkeyed booleanHotkeyed) {
+        }
+        else if (obj instanceof ConfigBooleanHotkeyed booleanHotkeyed) {
             SWITCH_KEY.add(booleanHotkeyed);
         }
     }

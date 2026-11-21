@@ -34,7 +34,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import com.sguserver.remotebotfetch.client.config.Configs;
-import com.sguserver.remotebotfetch.client.feature.lms.ItemStorageDataManager;
+import com.sguserver.remotebotfetch.client.utils.ItemStorageDataManager;
 
 /**
  * The in-inventory item fetch menu.

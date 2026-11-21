@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Remote Bot Fetch.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.sguserver.remotebotfetch.client.feature.lms;
+package com.sguserver.remotebotfetch.client.utils;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -41,10 +41,6 @@ import com.google.gson.GsonBuilder;
 import com.sguserver.remotebotfetch.client.ClientMod;
 import com.sguserver.remotebotfetch.client.config.Configs;
 import com.sguserver.remotebotfetch.client.config.options.OpenFakePlayerInvMode;
-import com.sguserver.remotebotfetch.client.utils.ChatHelper;
-import com.sguserver.remotebotfetch.client.utils.MCUtils;
-import com.sguserver.remotebotfetch.client.utils.PlayerUtils;
-import com.sguserver.remotebotfetch.client.utils.ThreadUtils;
 
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Remote Bot Fetch.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.sguserver.remotebotfetch.client.mixin.rbf;
+package com.sguserver.remotebotfetch.client.mixin;
 
 import net.minecraft.client.gui.screens.Screen;
 

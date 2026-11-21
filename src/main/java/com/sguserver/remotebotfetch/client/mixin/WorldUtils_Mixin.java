@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Remote Bot Fetch.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.sguserver.remotebotfetch.client.mixin.feature.lms;
+package com.sguserver.remotebotfetch.client.mixin;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -31,7 +31,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 
 import com.sguserver.remotebotfetch.client.ClientMod;
 import com.sguserver.remotebotfetch.client.config.Configs;
-import com.sguserver.remotebotfetch.client.feature.lms.ItemStorageDataManager;
+import com.sguserver.remotebotfetch.client.utils.ItemStorageDataManager;
 import com.sguserver.remotebotfetch.client.utils.PlayerUtils;
 
 @Pseudo

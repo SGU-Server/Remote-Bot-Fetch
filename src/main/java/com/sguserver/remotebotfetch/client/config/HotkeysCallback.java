@@ -20,7 +20,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.player.LocalPlayer;
 
-import com.sguserver.remotebotfetch.client.feature.lms.ItemStorageDataManager;
+import com.sguserver.remotebotfetch.client.utils.ItemStorageDataManager;
 import com.sguserver.remotebotfetch.client.utils.MCUtils;
 
 import fi.dy.masa.malilib.config.options.ConfigHotkey;

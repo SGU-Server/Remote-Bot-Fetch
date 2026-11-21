@@ -37,6 +37,7 @@ import fi.dy.masa.malilib.config.options.ConfigBooleanHotkeyed;
 import fi.dy.masa.malilib.config.options.ConfigHotkey;
 import fi.dy.masa.malilib.config.options.ConfigInteger;
 import fi.dy.masa.malilib.config.options.ConfigOptionList;
+import fi.dy.masa.malilib.config.options.ConfigString;
 import fi.dy.masa.malilib.config.options.ConfigStringList;
 
 public class Configs implements IConfigHandler {
@@ -54,6 +55,10 @@ public class Configs implements IConfigHandler {
         @Config(tab = Tab.ALL)
         public static final ConfigBoolean INVENTORY_FETCH_MENU =
             new ConfigBoolean("inventoryFetchMenu", true, "").apply(ALL);
+        @Config(tab = Tab.ALL)
+        public static final ConfigBoolean STASH_TO_BOT = new ConfigBoolean("stashToBot", true, "").apply(ALL);
+        @Config(tab = Tab.ALL)
+        public static final ConfigString STASH_BOT_NAME = new ConfigString("stashBotName", "bot_qwp", "").apply(ALL);
         @Config(tab = Tab.ALL)
         public static final ConfigBoolean LMS_FETCH_SUPPORT =
             new ConfigBoolean("fakeFetchSupport", false, "").apply(ALL);

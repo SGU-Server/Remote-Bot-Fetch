@@ -23,7 +23,6 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 import com.sguserver.remotebotfetch.client.ClientMod;
-import com.sguserver.remotebotfetch.client.annotations.Config;
 
 import fi.dy.masa.malilib.config.IConfigBase;
 import fi.dy.masa.malilib.config.IHotkeyTogglable;
@@ -55,8 +54,7 @@ public class ConfigsManager {
 
         if (obj instanceof ConfigHotkey hotkey) {
             KEY_LIST.add(hotkey);
-        }
-        else if (obj instanceof ConfigBooleanHotkeyed booleanHotkeyed) {
+        } else if (obj instanceof ConfigBooleanHotkeyed booleanHotkeyed) {
             SWITCH_KEY.add(booleanHotkeyed);
         }
     }

@@ -28,13 +28,6 @@ import com.sguserver.remotebotfetch.client.config.Configs;
 import com.sguserver.remotebotfetch.client.gui.RbfFetchPanel;
 import com.sguserver.remotebotfetch.client.gui.RbfGraphics;
 import com.sguserver.remotebotfetch.client.gui.RbfPanelHost;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * Hosts the RBF fetch panel on the player inventory, in the place where the vanilla recipe book normally is. All the
@@ -50,15 +43,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 //#endif
 public abstract class AbstractRecipeBookScreenMixin implements RbfPanelHost {
     //#if MC>=12102
-    @Shadow
-    @Final
+    @org.spongepowered.asm.mixin.Shadow
+    @org.spongepowered.asm.mixin.Final
     private RecipeBookComponent recipeBookComponent;
     //#endif
 
-    @Unique
+    @org.spongepowered.asm.mixin.Unique
     private RbfFetchPanel rbf$panel;
 
-    @Unique
+    @org.spongepowered.asm.mixin.Unique
     private boolean rbf$wasOpen;
 
     @Override
@@ -88,12 +81,13 @@ public abstract class AbstractRecipeBookScreenMixin implements RbfPanelHost {
         }
     }
 
-    @Inject(method = "init", at = @At("TAIL"))
-    private void rbf$onInit(CallbackInfo ci) {
+    @org.spongepowered.asm.mixin.injection.Inject(method = "init",
+        at = @org.spongepowered.asm.mixin.injection.At("TAIL"))
+    private void rbf$onInit(org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
         RbfFetchPanel panel = this.rbf$getPanel();
         panel.reset();
 
-        if (!this.rbf$isPlayerInventory()) {
+        if (this.rbf$isPlayerInventory()) {
             this.rbf$wasOpen = false;
             return;
         }
@@ -112,10 +106,10 @@ public abstract class AbstractRecipeBookScreenMixin implements RbfPanelHost {
     }
 
     //#if MC>=260101
-    @Inject(method = "extractRenderState",
-            at = @At("HEAD"))
+    @org.spongepowered.asm.mixin.injection.Inject(method = "extractRenderState",
+        at = @org.spongepowered.asm.mixin.injection.At("HEAD"))
     private void rbf$hideRecipeBook(net.minecraft.client.gui.GuiGraphicsExtractor graphics, int mouseX, int mouseY,
-        float partial, CallbackInfo ci) {
+        float partial, org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
         if (this.rbf$isPlayerInventory() && Configs.LMS.INVENTORY_FETCH_MENU.getBooleanValue()) {
             // The recipe book re-opens itself when a new recipe is unlocked, so keep it
             // hidden on every frame instead of only when the screen is created.
@@ -123,14 +117,14 @@ public abstract class AbstractRecipeBookScreenMixin implements RbfPanelHost {
         }
     }
 
-    @Inject(method = "extractRenderState",
-            at = @At("TAIL"))
+    @org.spongepowered.asm.mixin.injection.Inject(method = "extractRenderState",
+        at = @org.spongepowered.asm.mixin.injection.At("TAIL"))
     private void rbf$renderPanel(net.minecraft.client.gui.GuiGraphicsExtractor graphics, int mouseX, int mouseY,
-        float partial, CallbackInfo ci) {
+        float partial, org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
         this.rbf$drawPanel(new RbfGraphics(graphics), mouseX, mouseY);
     }
     //#else
-    //$$ @Inject(method = "render", at = @org.spongepowered.asm.mixin.injection.At("HEAD"))
+    //$$ @org.spongepowered.asm.mixin.injection.Inject(method = "render", at = @org.spongepowered.asm.mixin.injection.At("HEAD"))
     //$$ private void rbf$hideRecipeBook(net.minecraft.client.gui.GuiGraphics graphics, int mouseX, int mouseY, float partial,
     //$$                                 org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
     //$$     if (this.rbf$isPlayerInventory() && Configs.LMS.INVENTORY_FETCH_MENU.getBooleanValue()) {
@@ -138,13 +132,13 @@ public abstract class AbstractRecipeBookScreenMixin implements RbfPanelHost {
     //$$     }
     //$$ }
     //$$
-    //$$ @Inject(method = "render", at = @org.spongepowered.asm.mixin.injection.At("TAIL"))
+    //$$ @org.spongepowered.asm.mixin.injection.Inject(method = "render", at = @org.spongepowered.asm.mixin.injection.At("TAIL"))
     //$$ private void rbf$renderPanel(net.minecraft.client.gui.GuiGraphics graphics, int mouseX, int mouseY, float partial, org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
     //$$     this.rbf$drawPanel(new RbfGraphics(graphics), mouseX, mouseY);
     //$$ }
     //#endif
 
-    @Unique
+    @org.spongepowered.asm.mixin.Unique
     private void rbf$drawPanel(RbfGraphics graphics, int mouseX, int mouseY) {
         if (!this.rbf$isPlayerInventory()) {
             return;
@@ -168,10 +162,10 @@ public abstract class AbstractRecipeBookScreenMixin implements RbfPanelHost {
     }
 
     //#if MC>=12110
-    @Inject(method = "mouseClicked",
-            at = @At("HEAD"), cancellable = true)
+    @org.spongepowered.asm.mixin.injection.Inject(method = "mouseClicked",
+        at = @org.spongepowered.asm.mixin.injection.At("HEAD"), cancellable = true)
     private void rbf$mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick,
-        CallbackInfoReturnable<Boolean> cir) {
+        org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable<Boolean> cir) {
         if (!this.rbf$isPlayerInventory()) {
             return;
         }
@@ -186,10 +180,10 @@ public abstract class AbstractRecipeBookScreenMixin implements RbfPanelHost {
         }
     }
 
-    @Inject(method = "mouseDragged",
-            at = @At("HEAD"), cancellable = true)
+    @org.spongepowered.asm.mixin.injection.Inject(method = "mouseDragged",
+        at = @org.spongepowered.asm.mixin.injection.At("HEAD"), cancellable = true)
     private void rbf$mouseDragged(net.minecraft.client.input.MouseButtonEvent event, double dragX, double dragY,
-        CallbackInfoReturnable<Boolean> cir) {
+        org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable<Boolean> cir) {
         if (!this.rbf$isPlayerInventory()) {
             return;
         }
@@ -200,12 +194,11 @@ public abstract class AbstractRecipeBookScreenMixin implements RbfPanelHost {
         }
     }
 
-    @Inject(method = "keyPressed",
-            at = @At("HEAD"), cancellable = true)
+    @org.spongepowered.asm.mixin.injection.Inject(method = "keyPressed",
+        at = @org.spongepowered.asm.mixin.injection.At("HEAD"), cancellable = true)
     private void rbf$keyPressed(net.minecraft.client.input.KeyEvent event,
-        CallbackInfoReturnable<Boolean> cir) {
-
-        if (this.rbf$isPlayerInventory()) {
+        org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable<Boolean> cir) {
+        if (!this.rbf$isPlayerInventory()) {
             return;
         }
 
@@ -215,10 +208,10 @@ public abstract class AbstractRecipeBookScreenMixin implements RbfPanelHost {
         }
     }
 
-    @Inject(method = "charTyped",
-            at = @At("HEAD"), cancellable = true)
+    @org.spongepowered.asm.mixin.injection.Inject(method = "charTyped",
+        at = @org.spongepowered.asm.mixin.injection.At("HEAD"), cancellable = true)
     private void rbf$charTyped(net.minecraft.client.input.CharacterEvent event,
-        CallbackInfoReturnable<Boolean> cir) {
+        org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable<Boolean> cir) {
         if (!this.rbf$isPlayerInventory()) {
             return;
         }
@@ -270,7 +263,7 @@ public abstract class AbstractRecipeBookScreenMixin implements RbfPanelHost {
     //$$ }
     //#endif
 
-    @Unique
+    @org.spongepowered.asm.mixin.Unique
     private RecipeBookComponent rbf$recipeBook() {
         //#if MC>=12102
         return this.recipeBookComponent;
@@ -279,37 +272,37 @@ public abstract class AbstractRecipeBookScreenMixin implements RbfPanelHost {
         //#endif
     }
 
-    @Unique
+    @org.spongepowered.asm.mixin.Unique
     private ContainerScreenAccessor rbf$access() {
         return (ContainerScreenAccessor)(Object)this;
     }
 
-    @Unique
+    @org.spongepowered.asm.mixin.Unique
     private int rbf$screenWidth() {
         return ((Screen)(Object)this).width;
     }
 
-    @Unique
+    @org.spongepowered.asm.mixin.Unique
     private int rbf$screenHeight() {
         return ((Screen)(Object)this).height;
     }
 
-    @Unique
+    @org.spongepowered.asm.mixin.Unique
     private List<? extends GuiEventListener> rbf$children() {
         return ((Screen)(Object)this).children();
     }
 
-    @Unique
+    @org.spongepowered.asm.mixin.Unique
     private int rbf$imageWidth() {
         return this.rbf$access().rbf$getImageWidth();
     }
 
-    @Unique
+    @org.spongepowered.asm.mixin.Unique
     private boolean rbf$isPlayerInventory() {
         return (Object)this instanceof InventoryScreen;
     }
 
-    @Unique
+    @org.spongepowered.asm.mixin.Unique
     private int rbf$shiftedLeftPos() {
         int shift = RbfFetchPanel.IMAGE_WIDTH + 6;
         int combined = this.rbf$imageWidth() + shift;
@@ -319,12 +312,12 @@ public abstract class AbstractRecipeBookScreenMixin implements RbfPanelHost {
         return (this.rbf$screenWidth() - combined) / 2 + shift;
     }
 
-    @Unique
+    @org.spongepowered.asm.mixin.Unique
     private int rbf$panelX() {
         return Math.max(this.rbf$access().rbf$getLeftPos() - RbfFetchPanel.IMAGE_WIDTH - 6, 2);
     }
 
-    @Unique
+    @org.spongepowered.asm.mixin.Unique
     private int rbf$panelY() {
         int topPos = this.rbf$access().rbf$getTopPos();
         int imageHeight = this.rbf$access().rbf$getImageHeight();

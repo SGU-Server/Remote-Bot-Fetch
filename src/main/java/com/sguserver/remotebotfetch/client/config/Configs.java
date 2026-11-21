@@ -27,7 +27,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sguserver.remotebotfetch.client.ClientMod;
-import com.sguserver.remotebotfetch.client.annotations.Config;
 import com.sguserver.remotebotfetch.client.config.options.OpenFakePlayerInvMode;
 
 import fi.dy.masa.malilib.config.ConfigUtils;

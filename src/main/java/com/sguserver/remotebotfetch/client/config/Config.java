@@ -14,14 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Remote Bot Fetch.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.sguserver.remotebotfetch.client.annotations;
+package com.sguserver.remotebotfetch.client.config;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import com.sguserver.remotebotfetch.client.config.Tab;
 
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)

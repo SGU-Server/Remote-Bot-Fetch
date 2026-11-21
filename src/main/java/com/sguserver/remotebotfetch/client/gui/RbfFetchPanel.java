@@ -606,6 +606,12 @@ public class RbfFetchPanel {
             return false;
         }
 
+        // The inventory key ('E' by default) closes the screen in AbstractContainerScreen. While the
+        // search box is focused it has to type a character instead, so swallow that key here.
+        if (this.mc.options.keyInventory.matches(event)) {
+            return true;
+        }
+
         // Let the edit box delete first: it knows about selections, word deletion and an active
         // input method composition. Only when it cannot delete anything (the caret was left at the
         // start of a non-empty text, which input methods do) do we drop the last character ourselves.
@@ -647,6 +653,12 @@ public class RbfFetchPanel {
     //$$
     //$$     if (!this.searchBox.isFocused()) {
     //$$         return false;
+    //$$     }
+    //$$
+    //$$     // The inventory key ('E' by default) closes the screen in AbstractContainerScreen. While the
+    //$$     // search box is focused it has to type a character instead, so swallow that key here.
+    //$$     if (this.mc.options.keyInventory.matches(keyCode, scanCode)) {
+    //$$         return true;
     //$$     }
     //$$
     //$$     if (keyCode == 259 || keyCode == 261) {

@@ -27,15 +27,15 @@ import com.sguserver.remotebotfetch.client.config.ConfigsManager;
 import com.sguserver.remotebotfetch.client.config.HotkeysCallback;
 import com.sguserver.remotebotfetch.client.config.InitHandler;
 import com.sguserver.remotebotfetch.client.config.InputHandler;
-import com.sguserver.remotebotfetch.client.utils.ItemStorageDataManager;
 import com.sguserver.remotebotfetch.client.utils.CommandUtils;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.sguserver.remotebotfetch.client.utils.ItemStorageDataManager;
 
 import fi.dy.masa.malilib.config.ConfigManager;
 import fi.dy.masa.malilib.event.InitializationHandler;
 import fi.dy.masa.malilib.event.InputEventHandler;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ClientMod implements ClientModInitializer {
     public static final String MOD_ID_FANCY = "Remote Bot Fetch";

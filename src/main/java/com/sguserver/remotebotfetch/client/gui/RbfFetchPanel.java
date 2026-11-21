@@ -606,9 +606,16 @@ public class RbfFetchPanel {
             return false;
         }
 
-        // Deletion is handled here instead of inside the edit box, because IME composition can
-        // leave the caret at the start of the text and the edit box then ignores backspace.
+        // Let the edit box delete first: it knows about selections, word deletion and an active
+        // input method composition. Only when it cannot delete anything (the caret was left at the
+        // start of a non-empty text, which input methods do) do we drop the last character ourselves.
         if (event.key() == 259 || event.key() == 261) {
+            String before = this.searchBox.getValue();
+            int cursor = this.searchBox.getCursorPosition();
+            boolean handled = this.searchBox.keyPressed(event);
+            if (handled && (cursor > 0 || !this.searchBox.getValue().equals(before))) {
+                return true;
+            }
             return this.rbf$deleteSearchText(event.key() == 259, event.hasControlDown());
         }
 
@@ -620,7 +627,9 @@ public class RbfFetchPanel {
             return false;
         }
 
-        return this.searchBox.charTyped(event);
+        boolean handled = this.searchBox.charTyped(event);
+        this.rbf$moveCaretToEndWhenStuck();
+        return handled;
     }
     //#else
     //$$ public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
@@ -641,6 +650,12 @@ public class RbfFetchPanel {
     //$$     }
     //$$
     //$$     if (keyCode == 259 || keyCode == 261) {
+    //$$         String before = this.searchBox.getValue();
+    //$$         int cursor = this.searchBox.getCursorPosition();
+    //$$         boolean handled = this.searchBox.keyPressed(keyCode, scanCode, modifiers);
+    //$$         if (handled && (cursor > 0 || !this.searchBox.getValue().equals(before))) {
+    //$$             return true;
+    //$$         }
     //$$         return this.rbf$deleteSearchText(keyCode == 259, Screen.hasControlDown());
     //$$     }
     //$$
@@ -652,9 +667,22 @@ public class RbfFetchPanel {
     //$$         return false;
     //$$     }
     //$$
-    //$$     return this.searchBox.charTyped(chr, modifiers);
+    //$$     boolean handled = this.searchBox.charTyped(chr, modifiers);
+    //$$     this.rbf$moveCaretToEndWhenStuck();
+    //$$     return handled;
     //$$ }
     //#endif
+
+    /**
+     * Input method composition can leave the caret at position 0 while the edit box already holds text; the edit box
+     * then ignores backspace and inserts new characters at the wrong place.
+     */
+    private void rbf$moveCaretToEndWhenStuck() {
+        String value = this.searchBox.getValue();
+        if (!value.isEmpty() && this.searchBox.getCursorPosition() == 0) {
+            this.searchBox.setCursorPosition(value.length());
+        }
+    }
 
     /**
      * Deletes a character (or a word when control is held) from the search text. Works even when the caret was left at

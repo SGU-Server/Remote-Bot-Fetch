@@ -9,7 +9,7 @@
     "message": "合二为一"
   },
   "homepage.feature.vanilla.description": {
-    "message": "Remote Bot Fetch 的服务端与客户端融合为单个 Jar 文件，方便更新模组的同时也变得更轻量化。"
+    "message": "Remote Bot Fetch 的服务端与客户端融合为单个 Jar 文件，方便更新模组。"
   },
   "homepage.feature.versions.message": {
     "message": "广泛的版本兼容性"

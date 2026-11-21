@@ -29,7 +29,7 @@ const FeatureList = [
       <>
         <Translate id="homepage.feature.vanilla.description">
           The server and the client are merged into a single jar, so updating
-          the mod is one file and the whole thing is lighter
+          the mod is one file
         </Translate>
       </>
     ),

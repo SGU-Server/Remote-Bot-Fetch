@@ -436,6 +436,9 @@ public class RbfFetchPanel {
         int searchY = this.panelY + SEARCH_Y;
         if (this.hovering(searchX, searchY, SEARCH_WIDTH, SEARCH_HEIGHT, (int)mouseX, (int)mouseY)) {
             this.searchBox.setFocused(true);
+            // The panel is not part of the screen's widget tree, so the edit box never sees mouse
+            // input of its own; put the caret at the end instead of leaving it at position 0.
+            this.searchBox.setCursorPosition(this.searchBox.getValue().length());
             return true;
         }
         this.searchBox.setFocused(false);
@@ -598,7 +601,17 @@ public class RbfFetchPanel {
             return true;
         }
 
-        return this.searchBox.isFocused() && this.searchBox.keyPressed(event);
+        if (!this.searchBox.isFocused()) {
+            return false;
+        }
+
+        // Deletion is handled here instead of inside the edit box, because IME composition can
+        // leave the caret at the start of the text and the edit box then ignores backspace.
+        if (event.key() == 259 || event.key() == 261) {
+            return this.rbf$deleteSearchText(event.key() == 259, event.hasControlDown());
+        }
+
+        return this.searchBox.keyPressed(event);
     }
 
     public boolean charTyped(net.minecraft.client.input.CharacterEvent event) {
@@ -623,7 +636,15 @@ public class RbfFetchPanel {
     //$$         return true;
     //$$     }
     //$$
-    //$$     return this.searchBox.isFocused() && this.searchBox.keyPressed(keyCode, scanCode, modifiers);
+    //$$     if (!this.searchBox.isFocused()) {
+    //$$         return false;
+    //$$     }
+    //$$
+    //$$     if (keyCode == 259 || keyCode == 261) {
+    //$$         return this.rbf$deleteSearchText(keyCode == 259, Screen.hasControlDown());
+    //$$     }
+    //$$
+    //$$     return this.searchBox.keyPressed(keyCode, scanCode, modifiers);
     //$$ }
     //$$
     //$$ public boolean charTyped(char chr, int modifiers) {
@@ -634,6 +655,37 @@ public class RbfFetchPanel {
     //$$     return this.searchBox.charTyped(chr, modifiers);
     //$$ }
     //#endif
+
+    /**
+     * Deletes a character (or a word when control is held) from the search text. Works even when the caret was left at
+     * position 0 by an input method.
+     */
+    private boolean rbf$deleteSearchText(boolean backspace, boolean wholeWord) {
+        String value = this.searchBox.getValue();
+        if (value.isEmpty()) {
+            return true;
+        }
+
+        int cursor = this.searchBox.getCursorPosition();
+        if (backspace) {
+            if (cursor > 0) {
+                if (wholeWord) {
+                    this.searchBox.deleteWords(1);
+                } else {
+                    this.searchBox.deleteChars(1);
+                }
+            } else {
+                this.searchBox.setValue(value.substring(0, value.length() - 1));
+                this.searchBox.setCursorPosition(this.searchBox.getValue().length());
+            }
+            return true;
+        }
+
+        if (cursor < value.length()) {
+            this.searchBox.deleteCharsToPos(cursor + 1);
+        }
+        return true;
+    }
 
     //#if MC>=260101
     /**

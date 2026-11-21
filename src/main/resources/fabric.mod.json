@@ -4,7 +4,7 @@
   "version": "${version}",
   "name": "${name}",
   "description": "${description}",
-  "authors": ["Antideath", "jasonxue"],
+  "authors": ["Antideath", "jasonxue", "MiYui__"],
   "icon": "icon.png",
   "contact": {
     "homepage": "${website}",

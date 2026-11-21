@@ -597,8 +597,9 @@ public class RbfFetchPanel {
                 this.heldStack = ItemStack.EMPTY;
                 return true;
             }
-            this.close();
-            return true;
+            // Escape never closes the panel: it falls through to vanilla so the inventory closes,
+            // and the panel is restored the next time the inventory is opened.
+            return false;
         }
 
         if (!this.searchBox.isFocused()) {
@@ -632,8 +633,7 @@ public class RbfFetchPanel {
     //$$             this.heldStack = ItemStack.EMPTY;
     //$$             return true;
     //$$         }
-    //$$         this.close();
-    //$$         return true;
+    //$$         return false;
     //$$     }
     //$$
     //$$     if (!this.searchBox.isFocused()) {

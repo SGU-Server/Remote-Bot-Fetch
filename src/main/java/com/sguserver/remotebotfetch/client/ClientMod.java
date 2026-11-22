@@ -28,6 +28,7 @@ import com.sguserver.remotebotfetch.client.config.HotkeysCallback;
 import com.sguserver.remotebotfetch.client.config.InitHandler;
 import com.sguserver.remotebotfetch.client.config.InputHandler;
 import com.sguserver.remotebotfetch.client.feature.lms.ItemStorageDataManager;
+import com.sguserver.remotebotfetch.client.feature.stash.StashMarker;
 import com.sguserver.remotebotfetch.client.utils.CommandUtils;
 
 import org.slf4j.Logger;
@@ -62,6 +63,7 @@ public class ClientMod implements ClientModInitializer {
         ItemStorageDataManager.init();
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             ItemStorageDataManager.scanMatchedPlayersAndInteract(client);
+            StashMarker.tick(client);
             if (client.level != null && client.level.getGameTime() % 20000 == 0
                 && Configs.LMS.LMS_FETCH_SUPPORT.getBooleanValue() && Configs.LMS.LMS_AUTO_REFRESH.getBooleanValue()
                 && CommandUtils.canUseCommand("getStorageData")) {

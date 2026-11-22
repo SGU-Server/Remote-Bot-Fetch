@@ -109,6 +109,25 @@ public class PlayerUtils {
         }
     }
 
+    /**
+     * Shift clicks (quick moves) the given slot of the currently open container menu.
+     */
+    public static void quickMoveSlot(int containerId, int slotId) {
+        LocalPlayer player = MCUtils.getLocalPlayer();
+        Minecraft mc = MCUtils.getMinecraft();
+        if (player == null || mc.gameMode == null) {
+            return;
+        }
+
+        //#if MC>=260100
+        mc.gameMode.handleContainerInput(containerId, slotId, 0,
+            net.minecraft.world.inventory.ContainerInput.QUICK_MOVE, player);
+        //#else
+        //$$ mc.gameMode.handleInventoryMouseClick(containerId, slotId, 0,
+        //$$     net.minecraft.world.inventory.ClickType.QUICK_MOVE, player);
+        //#endif
+    }
+
     public static String getName(Player player) {
         //#if MC>=12110
         return player.getGameProfile().name();

@@ -116,8 +116,6 @@ dependencies {
     // runtime mods
     autoRuntimeOnly("me.fallenbreath:mixin-auditor:0.2.0-${if (unobfuscated) "u" else "o"}")
 
-    includeDependency(autoImplementation(libs.conditional.mixin.get()))
-
     autoImplementation("com.terraformersmc:modmenu:${gradleProperty("modmenuVersion")}")
     autoRuntimeOnly(fabricApiDependency("fabric-screen-api-v1"))
     autoRuntimeOnly(

@@ -29,8 +29,9 @@ import com.sguserver.remotebotfetch.client.feature.stash.StashMarker;
 import com.sguserver.remotebotfetch.client.mixin.rbf.ContainerScreenAccessor;
 
 /**
- * "Stash to bot" marking: while alt is held, clicking a player inventory slot marks the stack instead of moving it.
- * Marked slots get a red frame and are moved into the configured fake player when the container screen closes.
+ * "Stash to bot" marking: while the jump key (space by default) is held, left clicking a player inventory slot marks
+ * the stack instead of moving it. Marked slots get a red frame and are moved into the configured fake player when the
+ * container screen closes.
  */
 @org.spongepowered.asm.mixin.Mixin(AbstractContainerScreen.class)
 public abstract class ContainerScreenStashMixin {
@@ -47,14 +48,14 @@ public abstract class ContainerScreenStashMixin {
         at = @org.spongepowered.asm.mixin.injection.At("HEAD"), cancellable = true)
     private void rbf$mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick,
         CallbackInfoReturnable<Boolean> cir) {
-        if (this.rbf$tryMark(event.x(), event.y(), event.hasAltDown())) {
+        if (this.rbf$tryMark(event.x(), event.y(), event.button(), event.hasAltDown())) {
             cir.setReturnValue(true);
         }
     }
     //#else
     //$$ @org.spongepowered.asm.mixin.injection.Inject(method = "mouseClicked", at = @org.spongepowered.asm.mixin.injection.At("HEAD"), cancellable = true)
     //$$ private void rbf$mouseClicked(double mouseX, double mouseY, int button, org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable<Boolean> cir) {
-    //$$     if (this.rbf$tryMark(mouseX, mouseY, net.minecraft.client.gui.screens.Screen.hasAltDown())) {
+    //$$     if (this.rbf$tryMark(mouseX, mouseY, button, net.minecraft.client.gui.screens.Screen.hasAltDown())) {
     //$$         cir.setReturnValue(true);
     //$$     }
     //$$ }
@@ -105,9 +106,15 @@ public abstract class ContainerScreenStashMixin {
         }
     }
 
-    private boolean rbf$tryMark(double mouseX, double mouseY, boolean altDown) {
+    private boolean rbf$tryMark(double mouseX, double mouseY, int button, boolean altDown) {
         Minecraft mc = Minecraft.getInstance();
-        if (!Configs.LMS.STASH_TO_BOT.getBooleanValue() || mc.player == null || !altDown) {
+        if (!Configs.LMS.STASH_TO_BOT.getBooleanValue() || mc.player == null || button != 0) {
+            return false;
+        }
+
+        // Space is the stash key: holding it while left clicking a player inventory slot marks the stack. Alt is kept
+        // as an alias for players used to the previous binding.
+        if (!mc.options.keyJump.isDown() && !altDown) {
             return false;
         }
 
@@ -116,13 +123,15 @@ public abstract class ContainerScreenStashMixin {
         int leftPos = accessor.rbf$getLeftPos();
         int topPos = accessor.rbf$getTopPos();
         for (Slot slot : menu.slots) {
-            if (slot.container != mc.player.getInventory()) {
+            if (slot.container != mc.player.getInventory() || !slot.hasItem()) {
                 continue;
             }
             int x = leftPos + slot.x;
             int y = topPos + slot.y;
             if (mouseX >= x && mouseX < x + 16 && mouseY >= y && mouseY < y + 16) {
-                StashMarker.toggle(slot.getContainerSlot());
+                int inventorySlot = slot.getContainerSlot();
+                StashMarker.toggle(inventorySlot);
+                StashMarker.notifyMark(inventorySlot);
                 return true;
             }
         }

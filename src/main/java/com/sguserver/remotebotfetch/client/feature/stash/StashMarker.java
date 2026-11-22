@@ -34,10 +34,10 @@ import com.sguserver.remotebotfetch.client.utils.MCUtils;
 import com.sguserver.remotebotfetch.client.utils.PlayerUtils;
 
 /**
- * "Stash to bot" support. While the stash key is held (alt), clicking a slot marks the stack instead of moving it; the
- * marked slots are drawn with a red frame. When the container screen closes the marked stacks are moved into a fake
- * player: the client opens that fake player's inventory and quick-moves the marked player inventory slots into it, so
- * no server side command or server side code is involved.
+ * "Stash to bot" support. While the stash key is held (space by default), left clicking a slot marks the stack instead
+ * of moving it; the marked slots are drawn with a red frame. When the container screen closes the marked stacks are
+ * moved into a fake player: the client opens that fake player's inventory and quick-moves the marked player inventory
+ * slots into it, so no server side command or server side code is involved.
  */
 public final class StashMarker {
     private static final String DEFAULT_BOT_NAME = "bot_qwp";
@@ -78,6 +78,20 @@ public final class StashMarker {
 
     public static void clear() {
         MARKED.clear();
+    }
+
+    /** Shows the new mark state in the action bar, so the player gets immediate feedback for the click. */
+    public static void notifyMark(int inventorySlot) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) {
+            return;
+        }
+
+        if (MARKED.contains(inventorySlot)) {
+            message(mc, "已标记 %d 个槽位，关闭界面后送入假人 %s".formatted(MARKED.size(), botName()));
+        } else {
+            message(mc, "已取消标记，剩余 %d 个槽位".formatted(MARKED.size()));
+        }
     }
 
     public static String botName() {

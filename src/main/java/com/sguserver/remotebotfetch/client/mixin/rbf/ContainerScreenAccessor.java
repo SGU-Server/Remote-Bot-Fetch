@@ -17,14 +17,20 @@
 package com.sguserver.remotebotfetch.client.mixin.rbf;
 
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.world.inventory.Slot;
 
 /**
- * Accessors for the protected geometry fields of the container screens. org.spongepowered.asm.mixin.Mixin does not
- * resolve {@code @org.spongepowered.asm.mixin.Shadow} fields which are only declared by a super class, so the values
- * are read and written through this interface instead.
+ * Access to the container screen's slot hit test and layout, including from recipe book screen subclasses.
  */
 @org.spongepowered.asm.mixin.Mixin(AbstractContainerScreen.class)
 public interface ContainerScreenAccessor {
+    //#if MC>=12103
+    @org.spongepowered.asm.mixin.gen.Invoker("getHoveredSlot")
+    //#else
+    //$$ @org.spongepowered.asm.mixin.gen.Invoker("findSlot")
+    //#endif
+    Slot rbf$getSlotAt(double mouseX, double mouseY);
+
     @org.spongepowered.asm.mixin.gen.Accessor("leftPos")
     int rbf$getLeftPos();
 

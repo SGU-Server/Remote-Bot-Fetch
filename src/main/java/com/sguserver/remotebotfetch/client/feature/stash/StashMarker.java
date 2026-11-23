@@ -20,6 +20,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -28,8 +29,10 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
 import com.sguserver.remotebotfetch.client.config.Configs;
+import com.sguserver.remotebotfetch.client.utils.CommandUtils;
 import com.sguserver.remotebotfetch.client.utils.MCUtils;
 import com.sguserver.remotebotfetch.client.utils.PlayerUtils;
 
@@ -37,25 +40,31 @@ import com.sguserver.remotebotfetch.client.utils.PlayerUtils;
  * "Stash to bot" support. While the stash key is held (space by default), left clicking a slot marks the stack instead
  * of moving it; the marked slots are drawn with a red frame. When the container screen closes the marked stacks are
  * moved into a fake player: the client opens that fake player's inventory and quick-moves the marked player inventory
- * slots into it, so no server side command or server side code is involved.
+ * slots into it.
  */
 public final class StashMarker {
     private static final String DEFAULT_BOT_NAME = "bot_qwp";
-    /** Ticks to wait for the fake player to appear, or for its inventory screen to open, before giving up. */
+    /** Maximum wait for the bot, the initial inventory contents, or a source slot update. */
     private static final int TIMEOUT_TICKS = 120;
+    private static final int OPEN_FALLBACK_TICKS = 10;
 
     private static final Set<Integer> MARKED = new LinkedHashSet<>();
     private static final Deque<Integer> PENDING = new ArrayDeque<>();
 
     private static Stage stage = Stage.IDLE;
     private static int timer;
-    private static boolean askedForInventory;
+    private static boolean canOpenByCommand;
     private static String bot = DEFAULT_BOT_NAME;
+    private static Pattern botInTitle;
+    private static AbstractContainerMenu transferMenu;
+    private static Slot waitingSlot;
+    private static ItemStack beforeMove = ItemStack.EMPTY;
+    private static int movedItems;
 
     private StashMarker() {}
 
     private enum Stage {
-        IDLE, WAIT_CLOSE, WAIT_BOT, WAIT_SCREEN, MOVE
+        IDLE, WAIT_BOT, WAIT_SCREEN, TRANSFER
     }
 
     public static boolean isEmpty() {
@@ -70,9 +79,10 @@ public final class StashMarker {
         return MARKED.size();
     }
 
-    public static void toggle(int inventorySlot) {
-        if (!MARKED.remove(inventorySlot)) {
-            MARKED.add(inventorySlot);
+    public static void setMarked(int inventorySlot, boolean marked) {
+        boolean changed = marked ? MARKED.add(inventorySlot) : MARKED.remove(inventorySlot);
+        if (changed) {
+            notifyMark(inventorySlot);
         }
     }
 
@@ -81,7 +91,7 @@ public final class StashMarker {
     }
 
     /** Shows the new mark state in the action bar, so the player gets immediate feedback for the click. */
-    public static void notifyMark(int inventorySlot) {
+    private static void notifyMark(int inventorySlot) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) {
             return;
@@ -106,12 +116,14 @@ public final class StashMarker {
             return;
         }
 
-        PENDING.clear();
+        reset();
         PENDING.addAll(MARKED);
         MARKED.clear();
         bot = botName();
-        askedForInventory = false;
-        stage = Stage.WAIT_CLOSE;
+        botInTitle =
+            Pattern.compile("(?<![a-zA-Z0-9_])" + Pattern.quote(bot) + "(?![a-zA-Z0-9_])", Pattern.CASE_INSENSITIVE);
+        canOpenByCommand = CommandUtils.canUseCommand("player %s inventory".formatted(bot));
+        stage = Stage.WAIT_BOT;
         timer = 0;
     }
 
@@ -126,73 +138,131 @@ public final class StashMarker {
             return;
         }
 
-        if (stage == Stage.WAIT_CLOSE) {
-            if (MCUtils.getScreen() == null) {
-                stage = Stage.WAIT_BOT;
-                timer = 0;
-            }
+        if (stage == Stage.TRANSFER) {
+            tickTransfer(mc);
             return;
         }
 
         if (stage == Stage.WAIT_BOT) {
+            if (MCUtils.getScreen() != null) {
+                reset();
+                return;
+            }
             Player entity = findBot(mc);
-            if (entity != null) {
-                PlayerUtils.interactWith(entity, InteractionHand.MAIN_HAND);
-                stage = Stage.WAIT_SCREEN;
-                timer = 0;
-                return;
-            }
-
-            if (timer == 0) {
-                MCUtils.executeCommand("player %s rejoin".formatted(bot));
-            }
-            if (++timer > TIMEOUT_TICKS) {
-                message(mc, "假人 %s 不在线，暂存已取消".formatted(bot));
-                reset();
-            }
-            return;
-        }
-
-        if (stage == Stage.WAIT_SCREEN) {
-            AbstractContainerMenu menu = mc.player.containerMenu;
-            if (MCUtils.getScreen() instanceof AbstractContainerScreen<?> && menu != mc.player.inventoryMenu) {
-                stage = Stage.MOVE;
-                timer = 0;
-                return;
-            }
-
-            if (++timer > TIMEOUT_TICKS && !askedForInventory) {
-                askedForInventory = true;
-                timer = 0;
+            boolean online = entity != null || mc.player.connection.getPlayerInfo(bot) != null;
+            if (online && canOpenByCommand) {
                 MCUtils.executeCommand("player %s inventory".formatted(bot));
+            } else if (entity != null) {
+                PlayerUtils.interactWith(entity, InteractionHand.MAIN_HAND);
+            } else {
+                if (!online && timer == 0) {
+                    MCUtils.executeCommand("player %s rejoin".formatted(bot));
+                }
+                if (++timer >= TIMEOUT_TICKS) {
+                    message(mc, "找不到可交互的假人 %s，暂存已取消".formatted(bot));
+                    reset();
+                }
                 return;
             }
-            if (timer > TIMEOUT_TICKS) {
-                message(mc, "无法打开假人 %s 的背包，暂存已取消".formatted(bot));
-                reset();
-            }
+            stage = Stage.WAIT_SCREEN;
+            timer = 0;
             return;
         }
 
-        moveOne(mc);
+        if (MCUtils.getScreen() != null && !isBotInventory(mc)) {
+            message(mc, "打开的不是假人 %s 的背包，暂存已取消".formatted(bot));
+            reset();
+            return;
+        }
+        if (++timer == OPEN_FALLBACK_TICKS && MCUtils.getScreen() == null) {
+            if (canOpenByCommand) {
+                Player entity = findBot(mc);
+                if (entity != null) {
+                    PlayerUtils.interactWith(entity, InteractionHand.MAIN_HAND);
+                }
+            } else {
+                // Some servers accept the inventory command without advertising the subcommand.
+                MCUtils.executeCommand("player %s inventory".formatted(bot));
+            }
+        }
+        if (timer >= TIMEOUT_TICKS) {
+            message(mc, "无法打开假人 %s 的背包，暂存已取消".formatted(bot));
+            reset();
+        }
     }
 
-    private static void moveOne(Minecraft mc) {
-        AbstractContainerMenu menu = mc.player.containerMenu;
-        while (!PENDING.isEmpty()) {
-            int inventorySlot = PENDING.poll();
-            Slot target = findInventorySlot(mc, menu, inventorySlot);
-            if (target == null) {
-                continue;
-            }
+    private static boolean isBotInventory(Minecraft mc) {
+        return MCUtils.getScreen() instanceof AbstractContainerScreen<?> screen
+            && screen.getMenu() == mc.player.containerMenu && screen.getMenu() != mc.player.inventoryMenu
+            && botInTitle.matcher(screen.getTitle().getString()).find();
+    }
 
-            PlayerUtils.quickMoveSlot(menu.containerId, target.index);
+    /** Called after vanilla applies a complete snapshot, both on open and on resync. */
+    public static void onContentsReady(AbstractContainerMenu menu) {
+        if (menu == transferMenu && waitingSlot != null) {
+            onSlotSync(menu, waitingSlot.index);
             return;
+        }
+        if (stage != Stage.WAIT_SCREEN) {
+            return;
+        }
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || menu != mc.player.containerMenu || !Configs.LMS.STASH_TO_BOT.getBooleanValue()
+            || !isBotInventory(mc)) {
+            return;
+        }
+        transferMenu = menu;
+        stage = Stage.TRANSFER;
+        timer = 0;
+    }
+
+    private static void tickTransfer(Minecraft mc) {
+        if (mc.player.containerMenu != transferMenu || !isBotInventory(mc)) {
+            reset();
+            return;
+        }
+        if (waitingSlot != null) {
+            if (++timer >= TIMEOUT_TICKS) {
+                message(mc, "未收到槽位变动，已停止暂存。已确认转入 %d 件，请查看假人背包。".formatted(movedItems));
+                reset();
+            }
+            return;
+        }
+
+        while (!PENDING.isEmpty()) {
+            Slot target = findInventorySlot(mc, transferMenu, PENDING.removeFirst());
+            if (target != null) {
+                waitingSlot = target;
+                beforeMove = target.getItem().copy();
+                timer = 0;
+                PlayerUtils.requestQuickMove(mc.player, transferMenu, target.index);
+                return;
+            }
         }
 
         mc.player.closeContainer();
-        message(mc, "已把物品暂存到假人 %s".formatted(bot));
+        message(mc, "已向假人 %s 暂存 %d 件物品".formatted(bot, movedItems));
         reset();
+    }
+
+    /** Only an authoritative update for the outstanding source slot can advance the transfer. */
+    public static void onSlotSync(AbstractContainerMenu menu, int slotIndex) {
+        if (menu != transferMenu || waitingSlot == null || waitingSlot.index != slotIndex) {
+            return;
+        }
+        ItemStack after = waitingSlot.getItem();
+        if (!after.isEmpty()
+            && (!ItemStack.isSameItemSameComponents(beforeMove, after) || after.getCount() > beforeMove.getCount())) {
+            message(Minecraft.getInstance(), "物品栏内容已改变，已停止暂存。");
+            reset();
+            return;
+        }
+        int transferred = beforeMove.getCount() - after.getCount();
+        if (transferred > 0) {
+            movedItems += transferred;
+            waitingSlot = null;
+            beforeMove = ItemStack.EMPTY;
+        }
     }
 
     private static Slot findInventorySlot(Minecraft mc, AbstractContainerMenu menu, int inventorySlot) {
@@ -207,7 +277,7 @@ public final class StashMarker {
 
     private static Player findBot(Minecraft mc) {
         for (Player player : mc.level.players()) {
-            if (player.getName().getString().equals(bot)) {
+            if (PlayerUtils.getName(player).equalsIgnoreCase(bot)) {
                 return player;
             }
         }
@@ -227,7 +297,10 @@ public final class StashMarker {
     private static void reset() {
         stage = Stage.IDLE;
         timer = 0;
-        askedForInventory = false;
         PENDING.clear();
+        transferMenu = null;
+        waitingSlot = null;
+        beforeMove = ItemStack.EMPTY;
+        movedItems = 0;
     }
 }

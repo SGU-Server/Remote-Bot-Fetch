@@ -24,6 +24,9 @@ import java.util.Set;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -42,6 +45,7 @@ import com.sguserver.remotebotfetch.client.ClientMod;
 import com.sguserver.remotebotfetch.client.config.Configs;
 import com.sguserver.remotebotfetch.client.config.options.OpenFakePlayerInvMode;
 import com.sguserver.remotebotfetch.client.utils.ChatHelper;
+import com.sguserver.remotebotfetch.client.utils.CommandUtils;
 import com.sguserver.remotebotfetch.client.utils.MCUtils;
 import com.sguserver.remotebotfetch.client.utils.PlayerUtils;
 import com.sguserver.remotebotfetch.client.utils.ThreadUtils;
@@ -60,13 +64,42 @@ public class ItemStorageDataManager {
     private static final Type ITEM_TYPE = new TypeToken<List<ItemStorage>>() {}.getType();
     private static final Set<String> WAIT_FOR_INV = new ObjectArraySet<>();
     private static final Set<String> WAIT_FOR_KILLING = new ObjectArraySet<>();
+    private static Screen lastInventoryScreen;
+    private static final int STOCK_RETRY_TICKS = 100;
+    // Negative when no stock query is pending. A slow reply stays valid after another request is allowed.
+    private static int ticksWaitingForStock = -1;
+    private static boolean stockReceived;
 
     public static void init() {
         ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {
-            if (!Configs.LMS.LMS_FETCH_SUPPORT.getBooleanValue())
+            boolean fetchEnabled = Configs.LMS.LMS_FETCH_SUPPORT.getBooleanValue();
+            if (!fetchEnabled && ticksWaitingForStock < 0 && !Configs.LMS.INVENTORY_FETCH_MENU.getBooleanValue())
                 return true;
 
             var str = message.getString().trim();
+            if (ticksWaitingForStock >= 0 && str.equals("[]")) {
+                ITEM_STORAGES.clear();
+                stockReceived = true;
+                ticksWaitingForStock = -1;
+                return false;
+            }
+            boolean itemList =
+                str.startsWith("[{") && str.endsWith("}]") && str.contains("id:") && str.contains("count:");
+            if (itemList && !str.contains("name:")) {
+                try {
+                    List<ItemStorage> list = LENIENT_GSON.fromJson(str, ITEM_TYPE);
+                    ITEM_STORAGES.clear();
+                    list.forEach(storage -> ITEM_STORAGES.put(storage.id(), storage.count()));
+                    stockReceived = true;
+                    ticksWaitingForStock = -1;
+                    return false;
+                } catch (RuntimeException e) {
+                    ClientMod.debugMessage(() -> e.getCause() + e.getMessage());
+                    return true;
+                }
+            }
+            if (!fetchEnabled)
+                return true;
 
             if (str.contains("maxCount:") && str.startsWith("{") && str.endsWith("}")) {
                 ChatHelper.clientChatWithSound(ChatHelper.c("r 请求的数量超出配置的最大上限").copy().withStyle(ChatFormatting.RED),
@@ -78,46 +111,30 @@ public class ItemStorageDataManager {
             } else if (str.equals("[]")) {
                 ChatHelper.clientChatWithSound(ChatHelper.c("r 全无品: 这个物品暂时没有存货"), SoundEvents.VILLAGER_NO);
                 return false;
-            } else if (str.contains("id:") && str.contains("count:") && str.startsWith("[{") && str.endsWith("}]")) {
-                if (str.contains("name:")) {
-                    try {
-                        List<PlayerItemStorage> itemStorageList = LENIENT_GSON.fromJson(str, PLAYER_TYPE);
+            } else if (itemList) {
+                try {
+                    List<PlayerItemStorage> itemStorageList = LENIENT_GSON.fromJson(str, PLAYER_TYPE);
 
-                        if (itemStorageList == null || itemStorageList.isEmpty())
-                            return false;
-
-                        for (PlayerItemStorage storage : itemStorageList) {
-                            String name = storage.name();
-
-                            if (name == null)
-                                continue;
-
-                            MCUtils.executeCommand("player %s spawn".formatted(name));
-                            ChatHelper.clientChatWithSound(
-                                ChatHelper.c("g 假人: [%s] 取出数量: [%d]".formatted(name, storage.count())),
-                                SoundEvents.VILLAGER_YES);
-
-                            WAIT_FOR_INV.add(name);
-                            WAIT_FOR_KILLING.add(name);
-                        }
+                    if (itemStorageList == null || itemStorageList.isEmpty())
                         return false;
-                    } catch (Exception e) {
-                        ClientMod.debugMessage(() -> e.getCause() + e.getMessage());
+
+                    for (PlayerItemStorage storage : itemStorageList) {
+                        String name = storage.name();
+
+                        if (name == null)
+                            continue;
+
+                        MCUtils.executeCommand("player %s spawn".formatted(name));
+                        ChatHelper.clientChatWithSound(
+                            ChatHelper.c("g 假人: [%s] 取出数量: [%d]".formatted(name, storage.count())),
+                            SoundEvents.VILLAGER_YES);
+
+                        WAIT_FOR_INV.add(name);
+                        WAIT_FOR_KILLING.add(name);
                     }
-                } else {
-                    try {
-                        List<ItemStorage> list = LENIENT_GSON.fromJson(str, ITEM_TYPE);
-                        ITEM_STORAGES.clear();
-                        list.forEach(storage -> {
-                            String id = storage.id();
-                            int count = storage.count();
-                            ClientMod.debugMessage(() -> "Item: %s Count: %d".formatted(id, count));
-                            ITEM_STORAGES.put(id, count);
-                        });
-                        return false;
-                    } catch (Exception e) {
-                        ClientMod.debugMessage(() -> e.getCause() + e.getMessage());
-                    }
+                    return false;
+                } catch (Exception e) {
+                    ClientMod.debugMessage(() -> e.getCause() + e.getMessage());
                 }
             } else if (str.startsWith("[{") && str.endsWith("]") && str.contains("<...>")) {
                 ChatHelper.clientChatWithSound(ChatHelper.c(
@@ -145,6 +162,8 @@ public class ItemStorageDataManager {
             }
         }
 
+        // Both commands can reply with an untagged empty list. Give an explicit fetch its normal feedback.
+        ticksWaitingForStock = -1;
         MCUtils.executeCommand("getItem %s %d nbt".formatted(MCUtils.getItemID(item), count));
     }
 
@@ -198,7 +217,7 @@ public class ItemStorageDataManager {
         Item item = stack.getItem();
         int count = getCount(item, true) + getCount(item, false);
 
-        if (ITEM_STORAGES.isEmpty() && FAKE_ITEM_STORAGES.isEmpty()) {
+        if (!stockReceived && FAKE_ITEM_STORAGES.isEmpty()) {
             components.add(ChatHelper.c("r 物品未查询/缓存"));
         } else if (count > 0) {
             int oneBoxCount = stack.getMaxStackSize() * 27;
@@ -229,8 +248,37 @@ public class ItemStorageDataManager {
         return count;
     }
 
+    public static void tickStockRefresh(Minecraft mc) {
+        if (mc.player == null || mc.level == null) {
+            lastInventoryScreen = null;
+            ticksWaitingForStock = -1;
+            stockReceived = false;
+            ITEM_STORAGES.clear();
+            return;
+        }
+        if (ticksWaitingForStock >= 0 && ticksWaitingForStock < STOCK_RETRY_TICKS) {
+            ticksWaitingForStock++;
+        }
+        Screen screen = MCUtils.getScreen();
+        Screen inventory =
+            screen instanceof InventoryScreen || screen instanceof CreativeModeInventoryScreen ? screen : null;
+        boolean opened = inventory != null && inventory != lastInventoryScreen;
+        lastInventoryScreen = inventory;
+        boolean fetchEnabled = Configs.LMS.LMS_FETCH_SUPPORT.getBooleanValue();
+        boolean onOpen = opened && (Configs.LMS.INVENTORY_FETCH_MENU.getBooleanValue() || fetchEnabled);
+        boolean periodic = fetchEnabled && Configs.LMS.LMS_AUTO_REFRESH.getBooleanValue() && !mc.isPaused()
+            && mc.level.getGameTime() % 20000 == 0;
+        boolean canRequest = ticksWaitingForStock < 0 || ticksWaitingForStock >= STOCK_RETRY_TICKS;
+        if ((onOpen || periodic) && canRequest && CommandUtils.canUseCommand("getStorageData")) {
+            reflushCache();
+        }
+    }
+
     public static void reflushCache() {
-        MCUtils.executeCommand("getStorageData");
+        if (MCUtils.getConnection() != null) {
+            ticksWaitingForStock = 0;
+            MCUtils.executeCommand("getStorageData");
+        }
     }
 
     public static void scanMatchedPlayersAndInteract(Minecraft mc) {

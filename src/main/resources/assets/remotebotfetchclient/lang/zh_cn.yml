@@ -25,8 +25,8 @@
       "comment":
         "openGui": "打开设置菜单快捷键"
         "openFakeFetchGui": "打开假人取货菜单"
-        "inventoryFetchMenu": "开启后玩家物品栏的配方书按钮会切换左侧的取货菜单"
-        "stashToBot": "开启后按住空格点击槽位可以标记物品，关闭界面时把标记的物品送进假人背包（需要服务端命令 /stashToBot）"
+        "inventoryFetchMenu": "打开背包时自动查询服务器库存，点击配方书按钮可展开左侧取货菜单。"
+        "stashToBot": "按住跳跃键（默认空格）或 Alt，左键点击背包或快捷栏中的物品即可标记，再点一次取消。按住左键拖过多个槽位可连续标记或取消。关闭界面后，红框中的物品会送入指定假人的背包。"
         "stashBotName": "暂存物品时使用的假人名字，假人不在线时会自动召唤"
         "fakeFetchSupport": "需要LMS Carpet Addition"
         "middleClickLitematicBlockFetch": "启用后鼠标中键点击原理图内玩家背包中没有的方块会立即取货（需要LMS Carpet Addition）\nShift+中键取1盒\n中键取1组"

@@ -22,10 +22,12 @@ import java.util.function.Predicate;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -33,6 +35,7 @@ import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.phys.EntityHitResult;
 
 import fi.dy.masa.malilib.util.InventoryUtils;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 
 public class PlayerUtils {
     public static List<ItemStack> getInventory() {
@@ -109,22 +112,22 @@ public class PlayerUtils {
         }
     }
 
-    /**
-     * Shift clicks (quick moves) the given slot of the currently open container menu.
-     */
-    public static void quickMoveSlot(int containerId, int slotId) {
-        LocalPlayer player = MCUtils.getLocalPlayer();
-        Minecraft mc = MCUtils.getMinecraft();
-        if (player == null || mc.gameMode == null) {
-            return;
-        }
-
+    /** Leave the slots untouched locally so vanilla sends the actual changes back, even for a custom bot menu. */
+    public static void requestQuickMove(LocalPlayer player, AbstractContainerMenu menu, int slotId) {
         //#if MC>=260100
-        mc.gameMode.handleContainerInput(containerId, slotId, 0,
-            net.minecraft.world.inventory.ContainerInput.QUICK_MOVE, player);
+        var click = net.minecraft.world.inventory.ContainerInput.QUICK_MOVE;
         //#else
-        //$$ mc.gameMode.handleInventoryMouseClick(containerId, slotId, 0,
-        //$$     net.minecraft.world.inventory.ClickType.QUICK_MOVE, player);
+        //$$ var click = net.minecraft.world.inventory.ClickType.QUICK_MOVE;
+        //#endif
+        //#if MC>=12105
+        var carried = net.minecraft.network.HashedStack.create(menu.getCarried(),
+            player.connection.decoratedHashOpsGenenerator());
+        player.connection.send(new ServerboundContainerClickPacket(menu.containerId, menu.getStateId(),
+            com.google.common.primitives.Shorts.checkedCast(slotId), (byte)0, click, Int2ObjectMaps.emptyMap(),
+            carried));
+        //#else
+        //$$ player.connection.send(new ServerboundContainerClickPacket(menu.containerId, menu.getStateId(), slotId, 0,
+        //$$     click, menu.getCarried().copy(), Int2ObjectMaps.emptyMap()));
         //#endif
     }
 

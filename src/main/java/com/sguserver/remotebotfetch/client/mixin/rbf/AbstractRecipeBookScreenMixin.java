@@ -54,6 +54,9 @@ public abstract class AbstractRecipeBookScreenMixin implements RbfPanelHost {
     @org.spongepowered.asm.mixin.Unique
     private boolean rbf$wasOpen;
 
+    @org.spongepowered.asm.mixin.Unique
+    private boolean rbf$recipePanelOpenBeforeClick;
+
     @Override
     public RbfFetchPanel rbf$getPanel() {
         if (this.rbf$panel == null) {
@@ -171,6 +174,7 @@ public abstract class AbstractRecipeBookScreenMixin implements RbfPanelHost {
         }
 
         RbfFetchPanel panel = this.rbf$getPanel();
+        this.rbf$recipePanelOpenBeforeClick = this.rbf$isRecipePanelOpen();
         if (!panel.isOpen()) {
             return;
         }
@@ -229,6 +233,7 @@ public abstract class AbstractRecipeBookScreenMixin implements RbfPanelHost {
     //$$     }
     //$$
     //$$     RbfFetchPanel panel = this.rbf$getPanel();
+    //$$     this.rbf$recipePanelOpenBeforeClick = this.rbf$isRecipePanelOpen();
     //$$     if (!panel.isOpen()) {
     //$$         return;
     //$$     }
@@ -262,6 +267,28 @@ public abstract class AbstractRecipeBookScreenMixin implements RbfPanelHost {
     //$$     }
     //$$ }
     //#endif
+
+    @org.spongepowered.asm.mixin.injection.Inject(method = "mouseClicked",
+        at = @org.spongepowered.asm.mixin.injection.At("RETURN"))
+    private void
+        rbf$releaseToggleFocus(org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable<Boolean> cir) {
+        if (!this.rbf$isPlayerInventory() || this.rbf$recipePanelOpenBeforeClick == this.rbf$isRecipePanelOpen()) {
+            return;
+        }
+        // Vanilla assigns mouse focus after the recipe button's callback. Release it after dispatch so Space
+        // can be used to mark a slot. A button reached via keyboard navigation keeps its normal focus.
+        Screen screen = (Screen)(Object)this;
+        if (screen.getFocused() instanceof ImageButton) {
+            screen.setFocused(null);
+            screen.setDragging(false);
+        }
+    }
+
+    @org.spongepowered.asm.mixin.Unique
+    private boolean rbf$isRecipePanelOpen() {
+        return Configs.LMS.INVENTORY_FETCH_MENU.getBooleanValue() ? this.rbf$getPanel().isOpen()
+            : this.rbf$recipeBook().isVisible();
+    }
 
     @org.spongepowered.asm.mixin.Unique
     private RecipeBookComponent rbf$recipeBook() {

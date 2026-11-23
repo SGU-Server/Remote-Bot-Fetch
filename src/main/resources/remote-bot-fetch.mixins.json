@@ -16,6 +16,8 @@
     "feature.lms.MaterialListEntry_Mixin",
     "feature.lms.WorldUtils_Mixin",
     "feature.stash.ContainerScreenStashMixin",
+    "feature.stash.CreativeSlotAccessor",
+    "feature.stash.StashMenuSyncMixin",
     "rbf.AbstractRecipeBookScreenMixin",
     "rbf.ContainerEventHandlerScrollMixin",
     "rbf.ContainerScreenAccessor",

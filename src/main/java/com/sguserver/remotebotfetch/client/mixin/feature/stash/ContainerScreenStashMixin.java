@@ -18,67 +18,153 @@ package com.sguserver.remotebotfetch.client.mixin.feature.stash;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 
+import com.mojang.blaze3d.platform.InputConstants;
+
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.sguserver.remotebotfetch.client.config.Configs;
 import com.sguserver.remotebotfetch.client.feature.stash.StashMarker;
+import com.sguserver.remotebotfetch.client.gui.RbfGraphics;
 import com.sguserver.remotebotfetch.client.mixin.rbf.ContainerScreenAccessor;
 
-/**
- * "Stash to bot" marking: while the jump key (space by default) is held, left clicking a player inventory slot marks
- * the stack instead of moving it. Marked slots get a red frame and are moved into the configured fake player when the
- * container screen closes.
- */
-@org.spongepowered.asm.mixin.Mixin(AbstractContainerScreen.class)
-public abstract class ContainerScreenStashMixin {
-    private static final int RBF_MARK_COLOR = 0xFFFF3B30;
+import fi.dy.masa.malilib.hotkeys.KeybindMulti;
 
-    @org.spongepowered.asm.mixin.injection.Inject(method = "onClose",
-        at = @org.spongepowered.asm.mixin.injection.At("HEAD"))
+@Mixin(AbstractContainerScreen.class)
+public abstract class ContainerScreenStashMixin {
+    @Unique
+    private static final int RBF_MARK_COLOR = 0xFFFF3B30;
+    @Unique
+    private boolean rbf$marking;
+    @Unique
+    private boolean rbf$addMarks;
+
+    @Inject(method = "onClose", at = @At("HEAD"))
     private void rbf$onClose(CallbackInfo ci) {
         StashMarker.requestTransfer();
     }
 
+    @Inject(method = "removed", at = @At("HEAD"))
+    private void rbf$onRemoved(CallbackInfo ci) {
+        this.rbf$marking = false;
+        StashMarker.clear();
+    }
+
     //#if MC>=12110
-    @org.spongepowered.asm.mixin.injection.Inject(method = "mouseClicked",
-        at = @org.spongepowered.asm.mixin.injection.At("HEAD"), cancellable = true)
-    private void rbf$mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick,
+    @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
+    private void rbf$stashClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick,
         CallbackInfoReturnable<Boolean> cir) {
-        if (this.rbf$tryMark(event.x(), event.y(), event.button(), event.hasAltDown())) {
+        if (this.rbf$startMarking(event.x(), event.y(), event.button(), event.hasAltDown())) {
             cir.setReturnValue(true);
         }
     }
+
+    @Inject(method = "mouseDragged", at = @At("HEAD"), cancellable = true)
+    private void rbf$stashDragged(net.minecraft.client.input.MouseButtonEvent event, double dx, double dy,
+        CallbackInfoReturnable<Boolean> cir) {
+        if (this.rbf$continueMarking(event.x(), event.y(), event.button(), event.hasAltDown())) {
+            cir.setReturnValue(true);
+        }
+    }
+
+    @Inject(method = "mouseReleased", at = @At("HEAD"), cancellable = true)
+    private void rbf$stashReleased(net.minecraft.client.input.MouseButtonEvent event,
+        CallbackInfoReturnable<Boolean> cir) {
+        this.rbf$finishMarking(event.button(), cir);
+    }
     //#else
-    //$$ @org.spongepowered.asm.mixin.injection.Inject(method = "mouseClicked", at = @org.spongepowered.asm.mixin.injection.At("HEAD"), cancellable = true)
-    //$$ private void rbf$mouseClicked(double mouseX, double mouseY, int button, org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable<Boolean> cir) {
-    //$$     if (this.rbf$tryMark(mouseX, mouseY, button, net.minecraft.client.gui.screens.Screen.hasAltDown())) {
+    //$$ @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
+    //$$ private void rbf$stashClicked(double x, double y, int button, CallbackInfoReturnable<Boolean> cir) {
+    //$$     if (this.rbf$startMarking(x, y, button, net.minecraft.client.gui.screens.Screen.hasAltDown())) {
     //$$         cir.setReturnValue(true);
     //$$     }
     //$$ }
-    //#endif
-
-    //#if MC>=260100
-    @org.spongepowered.asm.mixin.injection.Inject(method = "extractRenderState",
-        at = @org.spongepowered.asm.mixin.injection.At("TAIL"))
-    private void rbf$extractRenderState(net.minecraft.client.gui.GuiGraphicsExtractor graphics, int mouseX, int mouseY,
-        float partialTick, CallbackInfo ci) {
-        this.rbf$renderMarks(graphics);
-    }
-    //#else
-    //$$ @org.spongepowered.asm.mixin.injection.Inject(method = "render", at = @org.spongepowered.asm.mixin.injection.At("TAIL"))
-    //$$ private void rbf$render(net.minecraft.client.gui.GuiGraphics graphics, int mouseX, int mouseY, float partialTick, org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
-    //$$     this.rbf$renderMarks(graphics);
+    //$$
+    //$$ @Inject(method = "mouseDragged", at = @At("HEAD"), cancellable = true)
+    //$$ private void rbf$stashDragged(double x, double y, int button, double dx, double dy, CallbackInfoReturnable<Boolean> cir) {
+    //$$     if (this.rbf$continueMarking(x, y, button, net.minecraft.client.gui.screens.Screen.hasAltDown())) {
+    //$$         cir.setReturnValue(true);
+    //$$     }
+    //$$ }
+    //$$
+    //$$ @Inject(method = "mouseReleased", at = @At("HEAD"), cancellable = true)
+    //$$ private void rbf$stashReleased(double x, double y, int button, CallbackInfoReturnable<Boolean> cir) {
+    //$$     this.rbf$finishMarking(button, cir);
     //$$ }
     //#endif
 
+    @Unique
+    private boolean rbf$startMarking(double x, double y, int button, boolean altDown) {
+        if (button != InputConstants.MOUSE_BUTTON_LEFT) {
+            return false;
+        }
+
+        int slot = this.rbf$stashSlotAt(x, y, altDown);
+        this.rbf$marking = slot >= 0;
+        if (this.rbf$marking) {
+            this.rbf$addMarks = !StashMarker.isMarked(slot);
+            StashMarker.setMarked(slot, this.rbf$addMarks);
+        }
+        return this.rbf$marking;
+    }
+
+    @Unique
+    private boolean rbf$continueMarking(double x, double y, int button, boolean altDown) {
+        if (!this.rbf$marking || button != InputConstants.MOUSE_BUTTON_LEFT) {
+            return false;
+        }
+
+        int slot = this.rbf$stashSlotAt(x, y, altDown);
+        if (slot >= 0) {
+            StashMarker.setMarked(slot, this.rbf$addMarks);
+        }
+        return true;
+    }
+
+    @Unique
+    private void rbf$finishMarking(int button, CallbackInfoReturnable<Boolean> cir) {
+        if (this.rbf$marking && button == InputConstants.MOUSE_BUTTON_LEFT) {
+            this.rbf$marking = false;
+            cir.setReturnValue(true);
+        }
+    }
+
+    @Unique
+    private int rbf$stashSlotAt(double x, double y, boolean altDown) {
+        Minecraft mc = Minecraft.getInstance();
+        if (!Configs.LMS.STASH_TO_BOT.getBooleanValue() || mc.player == null) {
+            return -1;
+        }
+
+        // Gameplay key mappings stop receiving presses while a container is open.
+        if (!altDown && !KeybindMulti.isKeyDown(KeybindMulti.getKeyCode(mc.options.keyJump))) {
+            return -1;
+        }
+
+        Slot slot = ((ContainerScreenAccessor)(Object)this).rbf$getSlotAt(x, y);
+        return slot != null && slot.hasItem() ? rbf$inventoryIndex(slot, mc.player.getInventory()) : -1;
+    }
+
+    // Recipe book screens can draw the container contents directly, bypassing the base screen's render method.
     //#if MC>=260100
-    private void rbf$renderMarks(net.minecraft.client.gui.GuiGraphicsExtractor graphics) {
+    @Inject(method = "extractContents", at = @At("TAIL"))
+    private void rbf$renderMarks(net.minecraft.client.gui.GuiGraphicsExtractor graphics, int mouseX, int mouseY,
+        float partialTick, CallbackInfo ci) {
         //#else
-        //$$ private void rbf$renderMarks(net.minecraft.client.gui.GuiGraphics graphics) {
+        //#if MC>=12108
+        //$$ @Inject(method = "renderContents", at = @At("TAIL"))
+        //#else
+        //$$ @Inject(method = "render", at = @At("TAIL"))
+        //#endif
+        //$$ private void rbf$renderMarks(net.minecraft.client.gui.GuiGraphics graphics, int mouseX, int mouseY,
+        //$$     float partialTick, CallbackInfo ci) {
         //#endif
         if (!Configs.LMS.STASH_TO_BOT.getBooleanValue() || StashMarker.isEmpty()) {
             return;
@@ -89,52 +175,26 @@ public abstract class ContainerScreenStashMixin {
             return;
         }
 
-        AbstractContainerMenu menu = mc.player.containerMenu;
+        RbfGraphics overlay = new RbfGraphics(graphics);
+        overlay.nextStratum();
         ContainerScreenAccessor accessor = (ContainerScreenAccessor)(Object)this;
-        int leftPos = accessor.rbf$getLeftPos();
-        int topPos = accessor.rbf$getTopPos();
-        for (Slot slot : menu.slots) {
-            if (slot.container != mc.player.getInventory() || !StashMarker.isMarked(slot.getContainerSlot())) {
-                continue;
+        int left = accessor.rbf$getLeftPos();
+        int top = accessor.rbf$getTopPos();
+        Inventory inventory = mc.player.getInventory();
+        for (Slot slot : ((AbstractContainerScreen<?>)(Object)this).getMenu().slots) {
+            if (slot.isActive() && StashMarker.isMarked(rbf$inventoryIndex(slot, inventory))) {
+                overlay.outline(left + slot.x - 1, top + slot.y - 1, 18, 18, RBF_MARK_COLOR);
             }
-            int x = leftPos + slot.x;
-            int y = topPos + slot.y;
-            graphics.fill(x, y, x + 16, y + 1, RBF_MARK_COLOR);
-            graphics.fill(x, y + 15, x + 16, y + 16, RBF_MARK_COLOR);
-            graphics.fill(x, y, x + 1, y + 16, RBF_MARK_COLOR);
-            graphics.fill(x + 15, y, x + 16, y + 16, RBF_MARK_COLOR);
         }
     }
 
-    private boolean rbf$tryMark(double mouseX, double mouseY, int button, boolean altDown) {
-        Minecraft mc = Minecraft.getInstance();
-        if (!Configs.LMS.STASH_TO_BOT.getBooleanValue() || mc.player == null || button != 0) {
-            return false;
+    @Unique
+    private static int rbf$inventoryIndex(Slot slot, Inventory inventory) {
+        if (slot instanceof CreativeSlotAccessor wrapper) {
+            slot = wrapper.rbf$getTarget();
         }
-
-        // Space is the stash key: holding it while left clicking a player inventory slot marks the stack. Alt is kept
-        // as an alias for players used to the previous binding.
-        if (!mc.options.keyJump.isDown() && !altDown) {
-            return false;
-        }
-
-        AbstractContainerMenu menu = mc.player.containerMenu;
-        ContainerScreenAccessor accessor = (ContainerScreenAccessor)(Object)this;
-        int leftPos = accessor.rbf$getLeftPos();
-        int topPos = accessor.rbf$getTopPos();
-        for (Slot slot : menu.slots) {
-            if (slot.container != mc.player.getInventory() || !slot.hasItem()) {
-                continue;
-            }
-            int x = leftPos + slot.x;
-            int y = topPos + slot.y;
-            if (mouseX >= x && mouseX < x + 16 && mouseY >= y && mouseY < y + 16) {
-                int inventorySlot = slot.getContainerSlot();
-                StashMarker.toggle(inventorySlot);
-                StashMarker.notifyMark(inventorySlot);
-                return true;
-            }
-        }
-        return false;
+        // The bot container exposes the player's main inventory and hotbar for quick moves.
+        int index = slot.getContainerSlot();
+        return slot.container == inventory && index >= 0 && index < Inventory.INVENTORY_SIZE ? index : -1;
     }
 }

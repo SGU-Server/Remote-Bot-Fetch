@@ -21,6 +21,10 @@ import net.minecraft.client.Minecraft;
 public class CommandUtils {
     public static boolean canUseCommand(String command) {
         var handler = Minecraft.getInstance().getConnection();
-        return handler != null && handler.getCommands().getRoot().getChild(command) != null;
+        if (handler == null) {
+            return false;
+        }
+        var parsed = handler.getCommands().parse(command, handler.getSuggestionsProvider());
+        return !parsed.getReader().canRead() && parsed.getContext().getCommand() != null;
     }
 }

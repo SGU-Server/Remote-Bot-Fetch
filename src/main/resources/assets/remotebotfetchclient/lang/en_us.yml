@@ -25,8 +25,8 @@
       "comment":
         "openGui": "Keybind to open settings"
         "openFakeFetchGui": "Open the fake player item retrieval menu"
-        "inventoryFetchMenu": "The recipe book button of the player inventory toggles the fetch panel on the left side"
-        "stashToBot": "Hold space and click a slot to mark it, the marked items are moved into a fake player inventory when the screen closes (requires the server command /stashToBot)"
+        "inventoryFetchMenu": "Opening your inventory refreshes server stock. Use the recipe book button to toggle the fetch panel on the left."
+        "stashToBot": "Hold Jump (Space by default) or Alt and left-click an item in your inventory or hotbar to mark it. Click again to unmark, or drag to apply the same action to more slots. Closing the screen sends the items outlined in red to the selected fake player."
         "stashBotName": "Fake player used for stashing, it is spawned automatically when it is offline"
         "fakeFetchSupport": "Requires LMS Carpet Addition"
         "middleClickLitematicBlockFetch": "After enabling, middle-clicking a block in a schematic that is not in the player's inventory will immediately retrieve it (requires LMS Carpet Addition)\nShift + middle-click retrieves 1 shulker box\nMiddle-click retrieves 1 stack"

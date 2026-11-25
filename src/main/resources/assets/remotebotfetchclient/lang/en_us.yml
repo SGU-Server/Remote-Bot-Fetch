@@ -25,7 +25,7 @@
       "comment":
         "openGui": "Keybind to open settings"
         "openFakeFetchGui": "Open the fake player item retrieval menu"
-        "inventoryFetchMenu": "Opening your inventory refreshes server stock. Use the recipe book button to toggle the fetch panel on the left."
+        "inventoryFetchMenu": "Server stock is queried the first time you open the inventory after joining a world. Use the recipe book button to toggle the fetch panel on the left."
         "stashToBot": "Hold Jump (Space by default) or Alt and left-click an item in your inventory or hotbar to mark it. Click again to unmark, or drag to apply the same action to more slots. Closing the screen sends the items outlined in red to the selected fake player."
         "stashBotName": "Fake player used for stashing, it is spawned automatically when it is offline"
         "fakeFetchSupport": "Requires LMS Carpet Addition"

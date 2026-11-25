@@ -65,6 +65,9 @@ public class ItemStorageDataManager {
     private static final Set<String> WAIT_FOR_INV = new ObjectArraySet<>();
     private static final Set<String> WAIT_FOR_KILLING = new ObjectArraySet<>();
     private static Screen lastInventoryScreen;
+    // The stock is queried once per world: the first time the player opens the inventory. Later openings reuse the
+    // cached data until the periodic refresh (LMS_AUTO_REFRESH) fires again.
+    private static boolean refreshedOnFirstOpen;
     private static final int STOCK_RETRY_TICKS = 100;
     // Negative when no stock query is pending. A slow reply stays valid after another request is allowed.
     private static int ticksWaitingForStock = -1;
@@ -251,6 +254,7 @@ public class ItemStorageDataManager {
     public static void tickStockRefresh(Minecraft mc) {
         if (mc.player == null || mc.level == null) {
             lastInventoryScreen = null;
+            refreshedOnFirstOpen = false;
             ticksWaitingForStock = -1;
             stockReceived = false;
             ITEM_STORAGES.clear();
@@ -265,11 +269,15 @@ public class ItemStorageDataManager {
         boolean opened = inventory != null && inventory != lastInventoryScreen;
         lastInventoryScreen = inventory;
         boolean fetchEnabled = Configs.LMS.LMS_FETCH_SUPPORT.getBooleanValue();
-        boolean onOpen = opened && (Configs.LMS.INVENTORY_FETCH_MENU.getBooleanValue() || fetchEnabled);
+        boolean onOpen =
+            opened && !refreshedOnFirstOpen && (Configs.LMS.INVENTORY_FETCH_MENU.getBooleanValue() || fetchEnabled);
         boolean periodic = fetchEnabled && Configs.LMS.LMS_AUTO_REFRESH.getBooleanValue() && !mc.isPaused()
             && mc.level.getGameTime() % 20000 == 0;
         boolean canRequest = ticksWaitingForStock < 0 || ticksWaitingForStock >= STOCK_RETRY_TICKS;
         if ((onOpen || periodic) && canRequest && CommandUtils.canUseCommand("getStorageData")) {
+            if (onOpen) {
+                refreshedOnFirstOpen = true;
+            }
             reflushCache();
         }
     }

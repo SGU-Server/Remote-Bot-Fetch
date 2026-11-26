@@ -52,9 +52,10 @@ public final class BotInventoryOpening {
             cancel();
             return;
         }
-        if (screen instanceof RbfBotInventoryScreen) {
+        if (screen instanceof RbfBotInventoryScreen botScreen) {
             // The bot menu is already open. Keep any pending switch window alive: the server closes the
             // current container before opening the next one, and that close arrives as a null screen.
+            botScreen.tickFocus();
             requested = null;
             attempts = 0;
             waitingTicks = 0;

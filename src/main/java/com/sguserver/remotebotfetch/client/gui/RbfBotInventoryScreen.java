@@ -60,6 +60,8 @@ public final class RbfBotInventoryScreen extends InventoryScreen {
     private int autoSwitchWait;
     private static int autoSwitchBudget = AUTO_SWITCH_LIMIT;
     private boolean filteredHintShown;
+    /** Fake player the panel still has to switch to, or null. */
+    private String pendingFocus;
 
     public RbfBotInventoryScreen(RbfBotInventoryMenu menu, Inventory inventory, Component title) {
         super(inventory.player);
@@ -254,6 +256,41 @@ public final class RbfBotInventoryScreen extends InventoryScreen {
         int index = this.page * BUTTONS_PER_PAGE + rowIndex;
         if (index < this.botNames.size() && this.botMenu.getCarried().isEmpty() && StashMarker.isEmpty()) {
             BotInventoryOpening.selectBot(this.botMenu, rowIndex);
+        }
+    }
+
+    /** True when this screen was opened with the given fake player among its choices. */
+    public boolean containsBot(String name) {
+        return this.botNames.contains(name);
+    }
+
+    /** Switches the panel to the given fake player as soon as paging allows it. */
+    public void focusBot(String name) {
+        this.pendingFocus = name;
+    }
+
+    /**
+     * Advances a pending switch. Paging is sent one request per tick because the server keeps its own page index, so
+     * the bot is only selected once the reached page matches the one that holds it.
+     */
+    public void tickFocus() {
+        if (this.pendingFocus == null) {
+            return;
+        }
+        String name = this.pendingFocus;
+        int index = this.botNames.indexOf(name);
+        if (index < 0) {
+            this.pendingFocus = null;
+            return;
+        }
+        int targetPage = index / BUTTONS_PER_PAGE;
+        if (this.page != targetPage) {
+            this.changePage(Integer.signum(targetPage - this.page));
+            return;
+        }
+        this.pendingFocus = null;
+        if (this.botMenu.getCarried().isEmpty() && StashMarker.isEmpty()) {
+            BotInventoryOpening.selectBot(this.botMenu, index % BUTTONS_PER_PAGE);
         }
     }
 

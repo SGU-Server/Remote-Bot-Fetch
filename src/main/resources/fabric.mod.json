@@ -21,7 +21,7 @@
   "depends": {
     "fabricloader": "*",
     "minecraft": "${minecraft_dependency}",
-    "remote-bot-fetch-server": "*",
+    "remote-bot-fetch-server": ">=${remote_bot_fetch_server_version}",
     "malilib": "*",
     "fabric-lifecycle-events-v1": "*",
     "fabric-message-api-v1": "*"

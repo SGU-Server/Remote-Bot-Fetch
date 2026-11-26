@@ -29,6 +29,7 @@ import com.sguserver.remotebotfetch.client.config.InitHandler;
 import com.sguserver.remotebotfetch.client.config.InputHandler;
 import com.sguserver.remotebotfetch.client.feature.lms.ItemStorageDataManager;
 import com.sguserver.remotebotfetch.client.feature.stash.StashMarker;
+import com.sguserver.remotebotfetch.client.gui.BotInventoryOpening;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,7 @@ public class ClientMod implements ClientModInitializer {
         version = FabricLoader.getInstance().getModContainer("remote-bot-fetch").orElseThrow().getMetadata()
             .getVersion().getFriendlyString();
         LOGGER.info("Remote Bot Fetch v{} is being loaded...", version);
+
         ConfigsManager.init();
         Configs.INSTANCE.load();
         HotkeysCallback.init();
@@ -61,6 +63,7 @@ public class ClientMod implements ClientModInitializer {
         InitializationHandler.getInstance().registerInitializationHandler(InitHandler.INSTANCE);
         ItemStorageDataManager.init();
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            BotInventoryOpening.tick(client);
             ItemStorageDataManager.scanMatchedPlayersAndInteract(client);
             StashMarker.tick(client);
             ItemStorageDataManager.tickStockRefresh(client);

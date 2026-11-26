@@ -112,8 +112,10 @@ public class PlayerUtils {
         }
     }
 
-    /** Leave the slots untouched locally so vanilla sends the actual changes back, even for a custom bot menu. */
+    /** Leave the slots untouched locally and request a full server update, even when nothing fits. */
     public static void requestQuickMove(LocalPlayer player, AbstractContainerMenu menu, int slotId) {
+        // Vanilla applies a click with a stale state ID, then sends the full menu. Server IDs are 15-bit counters.
+        int requestResync = -1;
         //#if MC>=260100
         var click = net.minecraft.world.inventory.ContainerInput.QUICK_MOVE;
         //#else
@@ -122,11 +124,11 @@ public class PlayerUtils {
         //#if MC>=12105
         var carried = net.minecraft.network.HashedStack.create(menu.getCarried(),
             player.connection.decoratedHashOpsGenenerator());
-        player.connection.send(new ServerboundContainerClickPacket(menu.containerId, menu.getStateId(),
+        player.connection.send(new ServerboundContainerClickPacket(menu.containerId, requestResync,
             com.google.common.primitives.Shorts.checkedCast(slotId), (byte)0, click, Int2ObjectMaps.emptyMap(),
             carried));
         //#else
-        //$$ player.connection.send(new ServerboundContainerClickPacket(menu.containerId, menu.getStateId(), slotId, 0,
+        //$$ player.connection.send(new ServerboundContainerClickPacket(menu.containerId, requestResync, slotId, 0,
         //$$     click, menu.getCarried().copy(), Int2ObjectMaps.emptyMap()));
         //#endif
     }

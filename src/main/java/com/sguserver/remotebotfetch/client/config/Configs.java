@@ -60,6 +60,15 @@ public class Configs implements IConfigHandler {
         @Config(tab = Tab.ALL)
         public static final ConfigString STASH_BOT_NAME = new ConfigString("stashBotName", "bot_qwp", "").apply(ALL);
         @Config(tab = Tab.ALL)
+        public static final ConfigBoolean BOT_INVENTORY_PANEL =
+            new ConfigBoolean("botInventoryOnOpen", true, "").apply(ALL);
+        @Config(tab = Tab.ALL)
+        public static final ConfigString BOT_INVENTORY_WHITELIST =
+            new ConfigString("botInventoryWhitelist", "", "").apply(ALL);
+        @Config(tab = Tab.ALL)
+        public static final ConfigString BOT_INVENTORY_BLACKLIST =
+            new ConfigString("botInventoryBlacklist", "", "").apply(ALL);
+        @Config(tab = Tab.ALL)
         public static final ConfigBoolean LMS_FETCH_SUPPORT =
             new ConfigBoolean("fakeFetchSupport", false, "").apply(ALL);
         @Config(tab = Tab.ALL)

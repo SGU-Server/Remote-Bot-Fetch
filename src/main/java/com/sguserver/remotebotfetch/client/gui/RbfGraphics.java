@@ -31,6 +31,10 @@ import net.minecraft.world.item.ItemStack;
  * supported gui graphics generation.
  */
 public final class RbfGraphics {
+    public interface Viewport {
+        void rbf$setViewport(RbfBotInventoryScreen screen);
+    }
+
     //#if MC>=260101
     private final net.minecraft.client.gui.GuiGraphicsExtractor graphics;
     //#else
@@ -135,6 +139,14 @@ public final class RbfGraphics {
         this.graphics.centeredText(font, text, x, y, color);
         //#else
         //$$ this.graphics.drawCenteredString(font, text, x, y, color);
+        //#endif
+    }
+
+    public void label(Font font, Component text, int x, int y) {
+        //#if MC>=260101
+        this.graphics.text(font, text, x, y, 0xFF404040, false);
+        //#else
+        //$$ this.graphics.drawString(font, text, x, y, 0xFF404040, false);
         //#endif
     }
 

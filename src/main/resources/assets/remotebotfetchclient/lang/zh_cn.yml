@@ -4,6 +4,7 @@
       "all": "全部"
     "all":
       "name":
+        "botInventoryOnOpen": "在背包中显示假人"
         "openGui": "打开设置菜单"
         "openFakeFetchGui": "打开假人取货菜单"
         "inventoryFetchMenu": "背包内取货"
@@ -23,6 +24,7 @@
         "fakeAutoRefresh": "假人取货自动查询"
         "debug": "调试模式"
       "comment":
+        "botInventoryOnOpen": "按 E 后可在右侧查看并切换服务器上可访问的在线假人。开启背包内取货时，左侧取货菜单、玩家背包和假人背包会同时显示。"
         "openGui": "打开设置菜单快捷键"
         "openFakeFetchGui": "打开假人取货菜单"
         "inventoryFetchMenu": "进入世界后第一次打开背包时自动查询服务器库存，点击配方书按钮可展开左侧取货菜单。"
@@ -46,4 +48,8 @@
       "cmd": "指令交互"
       "use": "右键交互"
   "gui":
+    "botInventory": "假人背包"
+    "botInventoryTitle": "%1$s"
+    "botInventoryNoResponse": "服务器没有打开假人背包。请确认服务端已安装 0.7.4 或更新的 remote-bot-fetch-server（或同一个通用 jar）、已经重启，并且有在线假人。"
     "refresh": "刷新"
+    "botInventoryFiltered": "你的假人背包黑白名单把所有在线假人都过滤掉了。"

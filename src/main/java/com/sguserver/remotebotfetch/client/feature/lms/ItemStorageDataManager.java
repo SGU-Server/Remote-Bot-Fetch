@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -44,6 +45,7 @@ import com.google.gson.GsonBuilder;
 import com.sguserver.remotebotfetch.client.ClientMod;
 import com.sguserver.remotebotfetch.client.config.Configs;
 import com.sguserver.remotebotfetch.client.config.options.OpenFakePlayerInvMode;
+import com.sguserver.remotebotfetch.client.gui.RbfBotInventoryScreen;
 import com.sguserver.remotebotfetch.client.utils.ChatHelper;
 import com.sguserver.remotebotfetch.client.utils.CommandUtils;
 import com.sguserver.remotebotfetch.client.utils.MCUtils;
@@ -292,15 +294,25 @@ public class ItemStorageDataManager {
     public static void scanMatchedPlayersAndInteract(Minecraft mc) {
         if (!Configs.LMS.AUTO_OPEN_FAKE_PLAYER_INV.getBooleanValue() || mc.level == null)
             return;
+        // Opening a fake player inventory replaces the current screen. The fetch panel lives in the player inventory,
+        // so that replacement is expected there, while the three-panel bot inventory has to stay visible.
+        if (!canReplaceScreen(MCUtils.getScreen()))
+            return;
 
         for (AbstractClientPlayer player : mc.level.players()) {
             var name = PlayerUtils.getName(player);
 
             if (WAIT_FOR_INV.remove(name)) {
                 ThreadUtils.runAsync(() -> {
+                    AtomicBoolean opened = new AtomicBoolean();
                     try {
                         Thread.sleep(Configs.LMS.AUTO_COOLDOWN.getIntegerValue());
                         MCUtils.executeTask(() -> {
+                            if (!canReplaceScreen(MCUtils.getScreen())) {
+                                WAIT_FOR_INV.add(name);
+                                return;
+                            }
+                            opened.set(true);
                             if (Configs.LMS.AUTO_OPEN_FAKE_PLAYER_INV_MODE
                                 .getOptionListValue() == OpenFakePlayerInvMode.COMMAND) {
                                 MCUtils.executeCommand("player %s inventory".formatted(name));
@@ -313,10 +325,26 @@ public class ItemStorageDataManager {
                         ClientMod.LOGGER.error(e.getMessage(), e);
                     }
 
-                    WAIT_FOR_KILLING.add(name);
+                    if (opened.get()) {
+                        WAIT_FOR_KILLING.add(name);
+                    }
                 });
             }
         }
+    }
+
+    /**
+     * The plain player inventory hosts the fetch panel, so opening the fake player inventory from it is the normal
+     * flow. The three-panel bot inventory already shows that player and must keep its screen.
+     */
+    private static boolean canReplaceScreen(Screen screen) {
+        if (screen == null) {
+            return true;
+        }
+        if (screen instanceof RbfBotInventoryScreen) {
+            return false;
+        }
+        return screen instanceof InventoryScreen || screen instanceof CreativeModeInventoryScreen;
     }
 
     public static Set<String> WAIT_FOR_KILLING() {

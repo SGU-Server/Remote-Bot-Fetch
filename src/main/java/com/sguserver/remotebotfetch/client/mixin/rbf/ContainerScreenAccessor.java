@@ -17,6 +17,7 @@
 package com.sguserver.remotebotfetch.client.mixin.rbf;
 
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 
 /**
@@ -24,6 +25,10 @@ import net.minecraft.world.inventory.Slot;
  */
 @org.spongepowered.asm.mixin.Mixin(AbstractContainerScreen.class)
 public interface ContainerScreenAccessor {
+    @org.spongepowered.asm.mixin.Mutable
+    @org.spongepowered.asm.mixin.gen.Accessor("menu")
+    void rbf$setMenu(AbstractContainerMenu menu);
+
     //#if MC>=12103
     @org.spongepowered.asm.mixin.gen.Invoker("getHoveredSlot")
     //#else
@@ -42,6 +47,10 @@ public interface ContainerScreenAccessor {
 
     @org.spongepowered.asm.mixin.gen.Accessor("imageWidth")
     int rbf$getImageWidth();
+
+    @org.spongepowered.asm.mixin.Mutable
+    @org.spongepowered.asm.mixin.gen.Accessor("imageWidth")
+    void rbf$setImageWidth(int imageWidth);
 
     @org.spongepowered.asm.mixin.gen.Accessor("imageHeight")
     int rbf$getImageHeight();

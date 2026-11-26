@@ -5,6 +5,8 @@
     "all":
       "name":
         "botInventoryOnOpen": "在背包中显示假人"
+        "botInventoryWhitelist": "假人背包面板-白名单"
+        "botInventoryBlacklist": "假人背包面板-黑名单"
         "openGui": "打开设置菜单"
         "openFakeFetchGui": "打开假人取货菜单"
         "inventoryFetchMenu": "背包内取货"
@@ -25,6 +27,8 @@
         "debug": "调试模式"
       "comment":
         "botInventoryOnOpen": "按 E 后可在右侧查看并切换服务器上可访问的在线假人。开启背包内取货时，左侧取货菜单、玩家背包和假人背包会同时显示。"
+        "botInventoryWhitelist": "只显示名字匹配这些模式的假人，逗号分隔，* 可匹配任意字符；留空表示显示全部假人。"
+        "botInventoryBlacklist": "不显示名字匹配这些模式的假人，逗号分隔，* 可匹配任意字符；同时命中白名单与黑名单时黑名单优先。"
         "openGui": "打开设置菜单快捷键"
         "openFakeFetchGui": "打开假人取货菜单"
         "inventoryFetchMenu": "进入世界后第一次打开背包时自动查询服务器库存，点击配方书按钮可展开左侧取货菜单。"

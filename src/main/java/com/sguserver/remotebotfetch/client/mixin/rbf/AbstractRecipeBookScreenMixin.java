@@ -23,8 +23,10 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
+import net.minecraft.world.inventory.InventoryMenu;
 
 import com.sguserver.remotebotfetch.client.config.Configs;
+import com.sguserver.remotebotfetch.client.gui.RbfBotInventoryScreen;
 import com.sguserver.remotebotfetch.client.gui.RbfFetchPanel;
 import com.sguserver.remotebotfetch.client.gui.RbfGraphics;
 import com.sguserver.remotebotfetch.client.gui.RbfPanelHost;
@@ -45,6 +47,7 @@ public abstract class AbstractRecipeBookScreenMixin implements RbfPanelHost {
     //#if MC>=12102
     @org.spongepowered.asm.mixin.Shadow
     @org.spongepowered.asm.mixin.Final
+    @org.spongepowered.asm.mixin.Mutable
     private RecipeBookComponent recipeBookComponent;
     //#endif
 
@@ -66,10 +69,39 @@ public abstract class AbstractRecipeBookScreenMixin implements RbfPanelHost {
     }
 
     @Override
+    public void rbf$setPanel(RbfFetchPanel panel) {
+        this.rbf$panel = panel;
+    }
+
+    @Override
     public void rbf$updatePanelPosition(boolean open) {
-        this.rbf$access()
-            .rbf$setLeftPos(open ? this.rbf$shiftedLeftPos() : (this.rbf$screenWidth() - this.rbf$imageWidth()) / 2);
+        if ((Object)this instanceof RbfBotInventoryScreen screen) {
+            screen.updatePanelLayout(open);
+            return;
+        }
+        if (open && this.rbf$screenWidth() < RbfBotInventoryScreen.MIN_FETCH_WIDTH) {
+            this.rbf$getPanel().close();
+            open = false;
+        }
+        this.rbf$access().rbf$setLeftPos(this.rbf$inventoryLeftPos(open));
         this.rbf$moveRecipeButton();
+    }
+
+    @Override
+    public void rbf$useInventoryMenu(InventoryMenu menu) {
+        //#if MC>=12102
+        this.recipeBookComponent = new net.minecraft.client.gui.screens.recipebook.CraftingRecipeBookComponent(menu);
+        //#endif
+    }
+
+    @Override
+    public boolean rbf$isVanillaRecipeOpen() {
+        return !Configs.LMS.INVENTORY_FETCH_MENU.getBooleanValue() && this.rbf$recipeBook().isVisible();
+    }
+
+    @Override
+    public int rbf$vanillaLeftPos(int width) {
+        return this.rbf$recipeBook().updateScreenPosition(this.rbf$screenWidth(), width);
     }
 
     @Override
@@ -88,7 +120,9 @@ public abstract class AbstractRecipeBookScreenMixin implements RbfPanelHost {
         at = @org.spongepowered.asm.mixin.injection.At("TAIL"))
     private void rbf$onInit(org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
         RbfFetchPanel panel = this.rbf$getPanel();
-        panel.reset();
+        if (!((Object)this instanceof RbfBotInventoryScreen)) {
+            panel.reset();
+        }
 
         if (!this.rbf$isPlayerInventory()) {
             this.rbf$wasOpen = false;
@@ -279,6 +313,9 @@ public abstract class AbstractRecipeBookScreenMixin implements RbfPanelHost {
         // can be used to mark a slot. A button reached via keyboard navigation keeps its normal focus.
         Screen screen = (Screen)(Object)this;
         if (screen.getFocused() instanceof ImageButton) {
+            if ((Object)this instanceof RbfBotInventoryScreen) {
+                this.rbf$updatePanelPosition(this.rbf$getPanel().isOpen());
+            }
             screen.setFocused(null);
             screen.setDragging(false);
         }
@@ -329,14 +366,20 @@ public abstract class AbstractRecipeBookScreenMixin implements RbfPanelHost {
         return (Object)this instanceof InventoryScreen;
     }
 
+    /**
+     * Reserves the fetch panel and the fake player panel up front, so the inventory does not jump sideways when the bot
+     * menu replaces this screen.
+     */
     @org.spongepowered.asm.mixin.Unique
-    private int rbf$shiftedLeftPos() {
-        int shift = RbfFetchPanel.IMAGE_WIDTH + 6;
-        int combined = this.rbf$imageWidth() + shift;
-        if (this.rbf$screenWidth() < combined) {
-            return (this.rbf$screenWidth() - this.rbf$imageWidth()) / 2;
+    private int rbf$inventoryLeftPos(boolean panelOpen) {
+        int screenWidth = this.rbf$screenWidth();
+        int leftPanel = panelOpen ? RbfFetchPanel.IMAGE_WIDTH + 6 : 0;
+        int botArea = Configs.LMS.BOT_INVENTORY_PANEL.getBooleanValue() ? RbfBotInventoryScreen.BOT_AREA_WIDTH : 0;
+        int combined = this.rbf$imageWidth() + leftPanel + botArea;
+        if (screenWidth < combined) {
+            return (screenWidth - this.rbf$imageWidth()) / 2;
         }
-        return (this.rbf$screenWidth() - combined) / 2 + shift;
+        return (screenWidth - combined) / 2 + leftPanel;
     }
 
     @org.spongepowered.asm.mixin.Unique

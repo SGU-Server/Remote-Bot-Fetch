@@ -32,6 +32,29 @@ import com.sguserver.remotebotfetch.client.gui.RbfPanelHost;
  */
 @org.spongepowered.asm.mixin.Mixin(InventoryScreen.class)
 public abstract class InventoryScreenMixin {
+    //#if MC>=12108
+    // The entity preview is a picture-in-picture pass with absolute bounds. It bypasses the GUI pose.
+    //#if MC>=260101
+    @org.spongepowered.asm.mixin.injection.ModifyArgs(method = "extractBackground",
+        at = @org.spongepowered.asm.mixin.injection.At(value = "INVOKE",
+            target = "Lnet/minecraft/client/gui/screens/inventory/InventoryScreen;extractEntityInInventoryFollowsMouse(Lnet/minecraft/client/gui/GuiGraphicsExtractor;IIIIIFFFLnet/minecraft/world/entity/LivingEntity;)V"))
+    //#else
+    //$$ @org.spongepowered.asm.mixin.injection.ModifyArgs(method = "renderBg", at = @org.spongepowered.asm.mixin.injection.At(value = "INVOKE",
+    //$$     target = "Lnet/minecraft/client/gui/screens/inventory/InventoryScreen;renderEntityInInventoryFollowsMouse(Lnet/minecraft/client/gui/GuiGraphics;IIIIIFFFLnet/minecraft/world/entity/LivingEntity;)V"))
+    //#endif
+    private void rbf$fitPlayerPreview(org.spongepowered.asm.mixin.injection.invoke.arg.Args args) {
+        if ((Object)this instanceof com.sguserver.remotebotfetch.client.gui.RbfBotInventoryScreen screen
+            && screen.contentScale() != 1.0) {
+            double scale = screen.contentScale();
+            for (int i = 1; i <= 5; i++) {
+                args.set(i, (int)Math.round(args.<Integer>get(i) * scale));
+            }
+            args.set(7, (float)(args.<Float>get(7) * scale));
+            args.set(8, (float)(args.<Float>get(8) * scale));
+        }
+    }
+    //#endif
+
     //#if MC>=12102
     @org.spongepowered.asm.mixin.injection.Inject(method = "onRecipeBookButtonClick",
         at = @org.spongepowered.asm.mixin.injection.At("HEAD"))

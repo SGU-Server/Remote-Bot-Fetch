@@ -16,12 +16,22 @@
  */
 package com.sguserver.remotebotfetch.client.gui;
 
+import net.minecraft.world.inventory.InventoryMenu;
+
 /**
  * Duck interface implemented by the mixins on the vanilla screens, so that every place which needs the fetch panel of a
  * screen can reach the very same panel instance without keeping a global map of screens around.
  */
 public interface RbfPanelHost {
     RbfFetchPanel rbf$getPanel();
+
+    void rbf$setPanel(RbfFetchPanel panel);
+
+    void rbf$useInventoryMenu(InventoryMenu menu);
+
+    boolean rbf$isVanillaRecipeOpen();
+
+    int rbf$vanillaLeftPos(int width);
 
     /**
      * Re-positions the screen for the given panel state: the inventory is shifted to the right while the panel is open,

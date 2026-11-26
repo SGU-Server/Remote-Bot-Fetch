@@ -29,6 +29,12 @@ val issueTrackerUrl: String = "$modSource/issues"
 val remoteBotFetchServerVersion = gradleProperty("remoteBotFetchServerVersion")
 
 repositories {
+    providers.gradleProperty("remoteBotFetchServerRepository").orNull?.let { localRepository ->
+        maven {
+            url = uri(localRepository)
+            content { includeModule("com.sgu-server.remote-bot-fetch", "remote-bot-fetch-server") }
+        }
+    }
     maven {
         url = uri("https://maven.parchmentmc.org")
         content { includeGroup("org.parchmentmc.data") }
@@ -226,6 +232,7 @@ val modProperties =
         "modrinth" to modrinthUrl,
         "curseforge" to curseforgeUrl,
         "minecraft_dependency" to minecraftDependency,
+        "remote_bot_fetch_server_version" to remoteBotFetchServerVersion,
     )
 
 tasks.named<ProcessResources>("processResources") {

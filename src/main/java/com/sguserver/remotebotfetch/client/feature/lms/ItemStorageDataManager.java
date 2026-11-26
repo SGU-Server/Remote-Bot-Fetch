@@ -295,10 +295,8 @@ public class ItemStorageDataManager {
         if (!Configs.LMS.AUTO_OPEN_FAKE_PLAYER_INV.getBooleanValue() || mc.level == null)
             return;
         // Opening a fake player inventory replaces the current screen. The fetch panel lives in the player inventory,
-        // so that replacement is expected there, while the three-panel bot inventory has to stay visible.
-        if (!canReplaceScreen(MCUtils.getScreen()))
-            return;
-
+        // so that replacement is expected there. The three-panel bot inventory keeps its own screen instead and
+        // switches to the fake player in place, because replacing it would drop the panel the player just used.
         for (AbstractClientPlayer player : mc.level.players()) {
             var name = PlayerUtils.getName(player);
 
@@ -308,7 +306,22 @@ public class ItemStorageDataManager {
                     try {
                         Thread.sleep(Configs.LMS.AUTO_COOLDOWN.getIntegerValue());
                         MCUtils.executeTask(() -> {
-                            if (!canReplaceScreen(MCUtils.getScreen())) {
+                            Screen screen = MCUtils.getScreen();
+                            if (screen instanceof RbfBotInventoryScreen botScreen) {
+                                // The bot list is a snapshot taken when the panel opened. Ask the panel to switch
+                                // instead of replacing it, so the fetched items show up without closing anything.
+                                if (botScreen.containsBot(name)) {
+                                    botScreen.focusBot(name);
+                                    opened.set(true);
+                                } else {
+                                    // This fake player joined after the panel opened, so close the panel and let
+                                    // the classic open below run on the next tick.
+                                    mc.player.closeContainer();
+                                    WAIT_FOR_INV.add(name);
+                                }
+                                return;
+                            }
+                            if (!canReplaceScreen(screen)) {
                                 WAIT_FOR_INV.add(name);
                                 return;
                             }
@@ -335,7 +348,7 @@ public class ItemStorageDataManager {
 
     /**
      * The plain player inventory hosts the fetch panel, so opening the fake player inventory from it is the normal
-     * flow. The three-panel bot inventory already shows that player and must keep its screen.
+     * flow. The three-panel bot inventory is handled before this check: it keeps its screen and switches in place.
      */
     private static boolean canReplaceScreen(Screen screen) {
         if (screen == null) {

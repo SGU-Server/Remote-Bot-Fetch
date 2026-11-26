@@ -154,9 +154,12 @@ public final class BotInventoryOpening {
         boolean opening = screen != null && screen == requested;
         boolean switching = switchInFlight()
             && (screen == null || screen instanceof RbfBotInventoryScreen || screen instanceof InventoryScreen);
-        // A bot switch closes the old container first, so the screen can legitimately be null here.
-        boolean accept = (opening || switching || screen == null || screen instanceof RbfBotInventoryScreen)
-            && StashMarker.isEmpty();
+        // A bot switch closes the old container first, so the screen can legitimately be null here. The plain
+        // player inventory is replaced by the bot inventory as well: fetching items from its panel makes the server
+        // open the bot inventory right away, and the vanilla screen must not swallow that packet.
+        boolean replaceable = screen == null || screen instanceof RbfBotInventoryScreen
+            || screen instanceof InventoryScreen || screen instanceof CreativeModeInventoryScreen;
+        boolean accept = (opening || switching || replaceable) && StashMarker.isEmpty();
         if (accept) {
             acceptedPanel = switching ? switchingPanel : panelOf(screen);
             if (opening && Configs.LMS.INVENTORY_FETCH_MENU.getBooleanValue() && !acceptedPanel.isOpen()) {

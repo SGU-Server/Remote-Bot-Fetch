@@ -26,7 +26,7 @@ if (isCloudflarePages) {
 const config = {
   title: "Remote Bot Fetch",
   tagline:
-    "Fabric mod for fetching items from Carpet fake players and checking storage counts in Litematica’s Material List.",
+    "A practical Carpet fake player storage mod that assists survival play.",
   favicon: "img/icon.png",
   headTags: [
     {

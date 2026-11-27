@@ -19,8 +19,8 @@ function HomepageHeader() {
         </Heading>
         <p className="hero__subtitle">
           <Translate id="homepage.header.subtitle">
-            A Carpet mod (fabric-carpet) extension, a collection of carpet mod
-            style useful tools and interesting features
+            A practical Carpet fake player storage mod that assists survival
+            play
           </Translate>
         </p>
         <div className={styles.buttons}>

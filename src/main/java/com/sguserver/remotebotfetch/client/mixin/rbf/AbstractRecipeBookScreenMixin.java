@@ -79,6 +79,11 @@ public abstract class AbstractRecipeBookScreenMixin implements RbfPanelHost {
             screen.updatePanelLayout(open);
             return;
         }
+        if (this.rbf$isVanillaRecipeOpen()) {
+            // The vanilla book draws at a screen relative position and only lines up with the
+            // centered inventory, so the screen must keep the position the book calculated.
+            return;
+        }
         if (open && this.rbf$screenWidth() < RbfBotInventoryScreen.MIN_FETCH_WIDTH) {
             this.rbf$getPanel().close();
             open = false;
@@ -180,6 +185,8 @@ public abstract class AbstractRecipeBookScreenMixin implements RbfPanelHost {
         if (!this.rbf$isPlayerInventory()) {
             return;
         }
+
+        this.rbf$reconcilePanelLayout();
 
         RbfFetchPanel panel = this.rbf$getPanel();
         boolean open = panel.isOpen();
@@ -364,6 +371,42 @@ public abstract class AbstractRecipeBookScreenMixin implements RbfPanelHost {
     @org.spongepowered.asm.mixin.Unique
     private boolean rbf$isPlayerInventory() {
         return (Object)this instanceof InventoryScreen;
+    }
+
+    /**
+     * The vanilla book button recalculates {@code leftPos} on every toggle, which drops the fetch panel offset and the
+     * fake player panel reservation. Reapply the layout that belongs to the current book state before drawing, so the
+     * screen snaps back after the book opens or closes.
+     */
+    @org.spongepowered.asm.mixin.Unique
+    private void rbf$reconcilePanelLayout() {
+        if ((Object)this instanceof RbfBotInventoryScreen) {
+            return;
+        }
+        if (!this.rbf$isPlayerInventory()) {
+            return;
+        }
+
+        if (this.rbf$isVanillaRecipeOpen()) {
+            // While the book is out the vanilla position wins, so undo any offset the mod added
+            // when the screen was created with the book still closed.
+            int vanilla = this.rbf$vanillaLeftPos(this.rbf$imageWidth());
+            if (this.rbf$access().rbf$getLeftPos() != vanilla) {
+                this.rbf$access().rbf$setLeftPos(vanilla);
+            }
+            return;
+        }
+
+        RbfFetchPanel panel = this.rbf$getPanel();
+        if (!panel.isOpen() && !Configs.LMS.BOT_INVENTORY_PANEL.getBooleanValue()) {
+            return;
+        }
+
+        int target = this.rbf$inventoryLeftPos(panel.isOpen());
+        if (this.rbf$access().rbf$getLeftPos() != target) {
+            this.rbf$access().rbf$setLeftPos(target);
+            this.rbf$moveRecipeButton();
+        }
     }
 
     /**
